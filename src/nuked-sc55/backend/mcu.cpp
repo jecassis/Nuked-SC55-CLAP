@@ -31,16 +31,17 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include "mcu.h"
-#include "mcu_timer.h"
-#include "mcu_opcodes.h"
-#include "submcu.h"
-#include "pcm.h"
 #include "lcd.h"
+#include "mcu_opcodes.h"
+#include "mcu_timer.h"
+#include "pcm.h"
+#include "submcu.h"
 
 void MCU_ErrorTrap(mcu_t& mcu)
 {
-//    fprintf(stderr, "%.2x %.4x\n", mcu.cp, mcu.pc);
+    //fprintf(stderr, "%.2x %.4x\n", mcu.cp, mcu.pc);
 }
 
 uint8_t RCU_Read(void)
@@ -148,7 +149,7 @@ READ_RCU:
             goto READ_RCU;
     }
     // TODO: really unreachable? maybe addressed upstream later?
-//    fprintf(stderr, "PANIC: reached end of MCU_AnalogReadPin\n");
+    //fprintf(stderr, "PANIC: reached end of MCU_AnalogReadPin\n");
     exit(1);
 }
 
@@ -449,7 +450,7 @@ uint8_t MCU_Read(mcu_t& mcu, uint32_t address)
                 }
                 else
                 {
-//                    fprintf(stderr, "Unknown read %x\n", address);
+                    //fprintf(stderr, "Unknown read %x\n", address);
                     ret = 0xff;
                 }
                 //
@@ -505,7 +506,7 @@ uint8_t MCU_Read(mcu_t& mcu, uint32_t address)
                 }
                 else
                 {
-//                    fprintf(stderr, "Unknown read %x\n", address);
+                    //fprintf(stderr, "Unknown read %x\n", address);
                     ret = 0xff;
                 }
                 //
@@ -628,8 +629,8 @@ void MCU_Write(mcu_t& mcu, uint32_t address, uint8_t value)
                     }
                     else if (address == (base | 0x402))
                         mcu.ga_int_enable = (value << 1);
-//                    else
-//                        fprintf(stderr, "Unknown write %x %x\n", address, value);
+                    //else
+                    //    fprintf(stderr, "Unknown write %x %x\n", address, value);
                     //
                     // e400: always 4?
                     // e401: SC0-6?
@@ -664,7 +665,7 @@ void MCU_Write(mcu_t& mcu, uint32_t address, uint8_t value)
                 }
                 else
                 {
-//                    fprintf(stderr, "Unknown write %x %x\n", address, value);
+                    //fprintf(stderr, "Unknown write %x %x\n", address, value);
                 }
             }
             else
@@ -707,7 +708,7 @@ void MCU_Write(mcu_t& mcu, uint32_t address, uint8_t value)
                 }
                 else
                 {
-//                    fprintf(stderr, "Unknown write %x %x\n", address, value);
+                    //fprintf(stderr, "Unknown write %x %x\n", address, value);
                 }
             }
         }
@@ -717,7 +718,7 @@ void MCU_Write(mcu_t& mcu, uint32_t address, uint8_t value)
         }
         else
         {
-//            fprintf(stderr, "Unknown write %x %x\n", address, value);
+            //fprintf(stderr, "Unknown write %x %x\n", address, value);
         }
     }
     else if (page == 5 && mcu.is_mk1)
@@ -738,7 +739,7 @@ void MCU_Write(mcu_t& mcu, uint32_t address, uint8_t value)
     }
     else
     {
-//        fprintf(stderr, "Unknown write %x %x\n", (page << 16) | address, value);
+        //fprintf(stderr, "Unknown write %x %x\n", (page << 16) | address, value);
     }
 }
 
@@ -767,13 +768,12 @@ void MCU_DefaultSampleCallback(void* userdata, const AudioFrame<int32_t>& frame)
     (void)frame;
 }
 
-bool MCU_Init(mcu_t& mcu, submcu_t& sm, pcm_t& pcm, mcu_timer_t& timer, lcd_t& lcd)
+void MCU_Init(mcu_t& mcu, submcu_t& sm, pcm_t& pcm, mcu_timer_t& timer, lcd_t& lcd)
 {
     mcu.sm = &sm;
     mcu.pcm = &pcm;
     mcu.timer = &timer;
     mcu.lcd = &lcd;
-    return true;
 }
 
 void MCU_Deinit(mcu_t& mcu)
@@ -857,16 +857,6 @@ void MCU_UpdateUART_TX(mcu_t& mcu)
     MCU_Interrupt_SetRequest(mcu, INTERRUPT_SOURCE_UART_TX, (mcu.dev_register[DEV_SCR] & 0x80) != 0);
 
     // fprintf(stderr, "tx:%x\n", mcu.dev_register[DEV_TDR]);
-}
-
-void MCU_WorkThread_Lock(mcu_t& mcu)
-{
-    mcu.work_thread_lock.lock();
-}
-
-void MCU_WorkThread_Unlock(mcu_t& mcu)
-{
-    mcu.work_thread_lock.unlock();
 }
 
 void MCU_Step(mcu_t& mcu)
@@ -978,3 +968,43 @@ void MCU_EncoderTrigger(mcu_t& mcu, int dir)
     MCU_GA_SetGAInt(mcu, dir == 0 ? 3 : 4, 1);
 }
 
+void MCU_SetRomset(mcu_t& mcu, Romset romset)
+{
+    mcu.romset   = romset;
+    mcu.is_mk1   = false;
+    mcu.is_cm300 = false;
+    mcu.is_st    = false;
+    mcu.is_jv880 = false;
+    mcu.is_scb55 = false;
+    mcu.is_sc155 = false;
+
+    switch (romset)
+    {
+    case Romset::MK2:
+    case Romset::SC155MK2:
+        if (romset == Romset::SC155MK2)
+            mcu.is_sc155 = true;
+        break;
+    case Romset::ST:
+        mcu.is_st = true;
+        break;
+    case Romset::MK1:
+    case Romset::SC155:
+        mcu.is_mk1 = true;
+        mcu.is_st  = false;
+        if (romset == Romset::SC155)
+            mcu.is_sc155 = true;
+        break;
+    case Romset::CM300:
+        mcu.is_mk1   = true;
+        mcu.is_cm300 = true;
+        break;
+    case Romset::JV880:
+        mcu.is_jv880   = true;
+        break;
+    case Romset::SCB55:
+    case Romset::RLP3237:
+        mcu.is_scb55 = true;
+        break;
+    }
+}

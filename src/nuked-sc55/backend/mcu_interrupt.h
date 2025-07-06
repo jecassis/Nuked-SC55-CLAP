@@ -31,39 +31,45 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  */
+
 #pragma once
 
 #include <cstdint>
-#include <filesystem>
 
 struct mcu_t;
 
-static const int lcd_width_max = 1024;
-static const int lcd_height_max = 1024;
+void MCU_Interrupt_SetRequest(mcu_t& mcu, uint32_t interrupt, uint32_t value);
+void MCU_Interrupt_Exception(mcu_t& mcu, uint32_t exception);
+void MCU_Interrupt_TRAPA(mcu_t& mcu, uint32_t vector);
+void MCU_Interrupt_Handle(mcu_t& mcu);
 
-struct lcd_t {
-    mcu_t* mcu = nullptr;
-
-    size_t width = 0;
-    size_t height = 0;
-
-    uint32_t color1 = 0;
-    uint32_t color2 = 0;
-
-    uint32_t LCD_DL = 0, LCD_N = 0, LCD_F = 0, LCD_D = 0, LCD_C = 0, LCD_B = 0, LCD_ID = 0, LCD_S = 0;
-    uint32_t LCD_DD_RAM = 0, LCD_AC = 0, LCD_CG_RAM = 0;
-    uint32_t LCD_RAM_MODE = 0;
-    uint8_t LCD_Data[80]{};
-    uint8_t LCD_CG[64]{};
-
-    uint8_t enable = 0;
-    bool quit_requested = false;
-
-    uint32_t buffer[lcd_height_max][lcd_width_max]{};
-    uint32_t background[268][741]{};
+enum {
+    INTERRUPT_SOURCE_NMI = 0,
+    INTERRUPT_SOURCE_IRQ0, // GPINT
+    INTERRUPT_SOURCE_IRQ1,
+    INTERRUPT_SOURCE_FRT0_ICI,
+    INTERRUPT_SOURCE_FRT0_OCIA,
+    INTERRUPT_SOURCE_FRT0_OCIB,
+    INTERRUPT_SOURCE_FRT0_FOVI,
+    INTERRUPT_SOURCE_FRT1_ICI,
+    INTERRUPT_SOURCE_FRT1_OCIA,
+    INTERRUPT_SOURCE_FRT1_OCIB,
+    INTERRUPT_SOURCE_FRT1_FOVI,
+    INTERRUPT_SOURCE_FRT2_ICI,
+    INTERRUPT_SOURCE_FRT2_OCIA,
+    INTERRUPT_SOURCE_FRT2_OCIB,
+    INTERRUPT_SOURCE_FRT2_FOVI,
+    INTERRUPT_SOURCE_TIMER_CMIA,
+    INTERRUPT_SOURCE_TIMER_CMIB,
+    INTERRUPT_SOURCE_TIMER_OVI,
+    INTERRUPT_SOURCE_ANALOG,
+    INTERRUPT_SOURCE_UART_RX,
+    INTERRUPT_SOURCE_UART_TX,
+    INTERRUPT_SOURCE_MAX
 };
 
-
-void LCD_Init(lcd_t& lcd, mcu_t& mcu);
-void LCD_Write(lcd_t& lcd, uint32_t address, uint8_t data);
-void LCD_Enable(lcd_t& lcd, uint32_t enable);
+enum {
+    EXCEPTION_SOURCE_ADDRESS_ERROR = 0,
+    EXCEPTION_SOURCE_INVALID_INSTRUCTION,
+    EXCEPTION_SOURCE_TRACE,
+};

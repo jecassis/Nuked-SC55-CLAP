@@ -3,10 +3,10 @@ cmake_minimum_required(VERSION 3.27)
 project(Nuked-SC55-CLAP
     VERSION     0.7.0
     DESCRIPTION "Nuked SC-55 CLAP audio plugin"
-    LANGUAGES   CXX
+    LANGUAGES   C CXX
 )
 
-set(CMAKE_CXX_STANDARD          20)
+set(CMAKE_CXX_STANDARD          23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeModules/")
@@ -21,14 +21,20 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 #configure_file(config.h.in config.h)
 
 add_library(Nuked-SC55-CLAP MODULE
-    src/nuked-sc55/emu.cpp
-    src/nuked-sc55/lcd.cpp
-    src/nuked-sc55/mcu.cpp
-    src/nuked-sc55/mcu_interrupt.cpp
-    src/nuked-sc55/mcu_opcodes.cpp
-    src/nuked-sc55/mcu_timer.cpp
-    src/nuked-sc55/pcm.cpp
-    src/nuked-sc55/submcu.cpp
+    src/nuked-sc55/backend/emu.cpp
+    src/nuked-sc55/backend/lcd.cpp
+    src/nuked-sc55/backend/mcu.cpp
+    src/nuked-sc55/backend/mcu_interrupt.cpp
+    src/nuked-sc55/backend/mcu_opcodes.cpp
+    src/nuked-sc55/backend/mcu_timer.cpp
+    src/nuked-sc55/backend/path_util.cpp
+    src/nuked-sc55/backend/pcm.cpp
+    src/nuked-sc55/backend/rom.cpp
+    src/nuked-sc55/backend/rom_io.cpp
+    src/nuked-sc55/backend/submcu.cpp
+
+    src/nuked-sc55/backend/sha/sha224-256.c
+    src/nuked-sc55/common/rom_loader.cpp
 
     src/nuked_sc55.cpp
     src/plugin.cpp
@@ -37,16 +43,16 @@ add_library(Nuked-SC55-CLAP MODULE
 set_target_properties(Nuked-SC55-CLAP PROPERTIES OUTPUT_NAME Nuked-SC55)
 
 set_property(
-	TARGET Nuked-SC55-CLAP
-	APPEND
-	PROPERTY ADDITIONAL_CLEAN_FILES ${CMAKE_BINARY_DIR}/Nuked-SC55.clap
+    TARGET Nuked-SC55-CLAP
+    APPEND
+    PROPERTY ADDITIONAL_CLEAN_FILES ${CMAKE_BINARY_DIR}/Nuked-SC55.clap
 )
 
 #----------------------------------------------------------------------------
 # Windows
 #----------------------------------------------------------------------------
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    #    target_link_options(Nuked-SC55-CLAP PRIVATE /EXPORT:clap_entry)
+    #target_link_options(Nuked-SC55-CLAP PRIVATE /EXPORT:clap_entry)
 
     set_target_properties(Nuked-SC55-CLAP PROPERTIES
         SUFFIX ".clap"
@@ -92,14 +98,13 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_libraries(Nuked-SC55-CLAP PRIVATE -Wl,-z,defs)
 
     set_target_properties(Nuked-SC55-CLAP PROPERTIES
-		SUFFIX ".clap"
-		PREFIX "")
+        SUFFIX ".clap"
+        PREFIX "")
 
     # strip debug info
-	#set(CMAKE_EXE_LINKER_FLAGS "-s")
+    #set(CMAKE_EXE_LINKER_FLAGS "-s")
 endif ()
-
 
 find_package(SpeexDSP REQUIRED)
 
-target_link_libraries(Nuked-SC55-CLAP  PRIVATE Speex::SpeexDSP)
+target_link_libraries(Nuked-SC55-CLAP PRIVATE Speex::SpeexDSP)

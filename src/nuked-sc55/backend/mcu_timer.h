@@ -31,62 +31,43 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  */
+
 #pragma once
 
-#include "mcu.h"
-#include "submcu.h"
-#include "mcu_timer.h"
-#include "lcd.h"
-#include "pcm.h"
-#include <filesystem>
-#include <memory>
-#include <span>
-#include <string_view>
+#include <cstdint>
 
-struct EMU_Options
-{
-    bool enable_lcd;
+struct mcu_t;
+
+struct frt_t {
+    uint8_t tcr = 0;
+    uint8_t tcsr = 0;
+    uint16_t frc = 0;
+    uint16_t ocra = 0;
+    uint16_t ocrb = 0;
+    uint16_t icr = 0;
+    uint8_t status_rd = 0;
 };
 
-enum class EMU_SystemReset {
-    NONE,
-    GS_RESET,
-    GM_RESET,
+struct mcu_timer_t {
+    uint8_t tcr = 0;
+    uint8_t tcsr = 0;
+    uint8_t tcora = 0;
+    uint8_t tcorb = 0;
+    uint8_t tcnt = 0;
+    uint8_t status_rd = 0;
+
+    mcu_t* mcu = nullptr;
+
+    uint64_t cycles = 0;
+    uint8_t tempreg = 0;
+
+    frt_t frt[3]{};
 };
 
-struct Emulator {
-public:
-    Emulator() = default;
+void TIMER_Init(mcu_timer_t& timer, mcu_t& mcu);
+void TIMER_Write(mcu_timer_t& timer, uint32_t address, uint8_t data);
+uint8_t TIMER_Read(mcu_timer_t& timer, uint32_t address);
+void TIMER_Clock(mcu_timer_t& timer, uint64_t cycles);
 
-    bool Init(const EMU_Options& options);
-
-    // Should be called after loading roms
-    void Reset();
-
-    void SetSampleCallback(mcu_sample_callback callback, void* userdata);
-
-    bool LoadRoms(Romset romset, const std::filesystem::path& base_path);
-
-    void PostMIDI(uint8_t data_byte);
-    void PostMIDI(std::span<const uint8_t> data);
-
-    void PostSystemReset(EMU_SystemReset reset);
-
-    mcu_t& GetMCU() { return *m_mcu; }
-    pcm_t& GetPCM() { return *m_pcm; }
-    lcd_t& GetLCD() { return *m_lcd; }
-
-    bool IsLCDEnabled() const { return m_options.enable_lcd; }
-
-private:
-    std::unique_ptr<mcu_t>       m_mcu;
-    std::unique_ptr<submcu_t>    m_sm;
-    std::unique_ptr<mcu_timer_t> m_timer;
-    std::unique_ptr<lcd_t>       m_lcd;
-    std::unique_ptr<pcm_t>       m_pcm;
-    EMU_Options                  m_options;
-};
-
-Romset EMU_DetectRomset(const std::filesystem::path& base_path);
-const char* EMU_RomsetName(Romset romset);
-bool EMU_ParseRomsetName(std::string_view name, Romset& romset);
+void TIMER2_Write(mcu_timer_t& timer, uint32_t address, uint8_t data);
+uint8_t TIMER_Read2(mcu_timer_t& timer, uint32_t address);

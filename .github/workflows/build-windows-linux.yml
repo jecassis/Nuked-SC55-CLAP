@@ -45,6 +45,8 @@ jobs:
           submodules: true
 
       - uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: "~3.31.0"
 
       - name: Dump the content of $RUNNER_TEMP
         run: find $RUNNER_TEMP

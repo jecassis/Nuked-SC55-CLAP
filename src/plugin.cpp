@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 // Number of plugins in this dynamic library
-constexpr auto NumPlugins = 4;
+constexpr auto NumPlugins = 5;
 
 constexpr auto Vendor  = "John Novak";
 constexpr auto Url     = "https://github.com/johnnovak/Nuked-SC55-CLAP";
@@ -19,6 +19,18 @@ const char *Features[] = {CLAP_PLUGIN_FEATURE_INSTRUMENT,
                           CLAP_PLUGIN_FEATURE_SYNTHESIZER,
                           CLAP_PLUGIN_FEATURE_STEREO,
                           nullptr};
+
+static const clap_plugin_descriptor_t plugin_descriptor_sc55_v1_00 = {
+    .clap_version = CLAP_VERSION_INIT,
+    .id           = "net.johnnovak.nuked_sc55_clap.sc55_v1_00",
+    .name         = "Nuked SC-55 — Roland SC-55 v1.00",
+    .vendor       = Vendor,
+    .url          = Url,
+    .manual_url   = Url,
+    .support_url  = Url,
+    .version      = Version,
+    .description  = "Roland SC-55 v1.00 MIDI sound module emulation",
+    .features     = Features};
 
 static const clap_plugin_descriptor_t plugin_descriptor_sc55_v1_20 = {
     .clap_version = CLAP_VERSION_INIT,
@@ -147,6 +159,53 @@ static const void* get_extension(const clap_plugin* plugin, const char* id)
         return nullptr;
     }
 }
+
+//----------------------------------------------------------------------------
+// SC-55 v1.00
+//----------------------------------------------------------------------------
+static const clap_plugin_t my_plugin_class_sc55_v1_00 = {
+
+    .desc = &plugin_descriptor_sc55_v1_00,
+
+    .plugin_data = nullptr,
+
+    .init = [](const clap_plugin* plugin) -> bool {
+        auto the_plugin = (NukedSc55*)plugin->plugin_data;
+        return the_plugin->Init(plugin);
+    },
+
+    .destroy =
+        [](const clap_plugin* plugin) {
+            auto the_plugin = (NukedSc55*)plugin->plugin_data;
+            the_plugin->Shutdown();
+            delete the_plugin;
+        },
+
+    .activate = [](const clap_plugin* plugin, double sample_rate,
+                   uint32_t min_frame_count, uint32_t max_frame_count) -> bool {
+        auto the_plugin = (NukedSc55*)plugin->plugin_data;
+        return the_plugin->Activate(sample_rate, min_frame_count, max_frame_count);
+    },
+
+    .deactivate = [](const clap_plugin* plugin) {},
+
+    .start_processing = [](const clap_plugin* plugin) -> bool { return true; },
+
+    .stop_processing = [](const clap_plugin* plugin) {},
+
+    .reset = [](const clap_plugin* plugin) {},
+
+    .process = [](const clap_plugin* plugin,
+                  const clap_process_t* process) -> clap_process_status {
+        auto the_plugin = (NukedSc55*)plugin->plugin_data;
+        return the_plugin->Process(process);
+    },
+
+    .get_extension = [](const clap_plugin* plugin, const char* id) -> const void* {
+        return get_extension(plugin, id);
+    },
+
+    .on_main_thread = [](const clap_plugin* plugin) {}};
 
 //----------------------------------------------------------------------------
 // SC-55 v1.20
@@ -349,15 +408,18 @@ static const clap_plugin_factory_t plugin_factory = {
     .get_plugin_descriptor = [](const clap_plugin_factory* factory,
                                 uint32_t index) -> const clap_plugin_descriptor_t* {
         if (index == 0) {
-            return &plugin_descriptor_sc55_v1_20;
+            return &plugin_descriptor_sc55_v1_00;
 
         } else if (index == 1) {
-            return &plugin_descriptor_sc55_v1_21;
+            return &plugin_descriptor_sc55_v1_20;
 
         } else if (index == 2) {
-            return &plugin_descriptor_sc55_v2_00;
+            return &plugin_descriptor_sc55_v1_21;
 
         } else if (index == 3) {
+            return &plugin_descriptor_sc55_v2_00;
+
+        } else if (index == 4) {
             return &plugin_descriptor_sc55mk2_v1_01;
 
         } else {
@@ -373,7 +435,12 @@ static const clap_plugin_factory_t plugin_factory = {
 
         NukedSc55* the_plugin = nullptr;
 
-        if (strcmp(plugin_id, plugin_descriptor_sc55_v1_20.id) == 0) {
+        if (strcmp(plugin_id, plugin_descriptor_sc55_v1_00.id) == 0) {
+            the_plugin = new NukedSc55(my_plugin_class_sc55_v1_00,
+                                       host,
+                                       NukedSc55::Model::Sc55_v1_00);
+
+        } else if (strcmp(plugin_id, plugin_descriptor_sc55_v1_20.id) == 0) {
             the_plugin = new NukedSc55(my_plugin_class_sc55_v1_20,
                                        host,
                                        NukedSc55::Model::Sc55_v1_20);

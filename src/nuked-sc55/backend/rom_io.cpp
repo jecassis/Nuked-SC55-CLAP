@@ -312,6 +312,53 @@ static constexpr KnownHash ROM_HASHES[] = {
     {ToDigest("5b753f6cef4cfc7fcafe1430fecbb94a739b874e55356246a46abe24097ee491"), Romset::ST, RomLocation::WAVEROM2},
 
     ///////////////////////////////////////////////////////////////////////////
+    // SC-55 (v1.00)
+    ///////////////////////////////////////////////////////////////////////////
+
+    // R15199748 (H8/532 mcu)
+    {ToDigest("b4ecf44bc0520322b0d114d397951d3bf92ca6fa51d0d27b2407df58a6be2efe"), Romset::MK1, RomLocation::ROM1},
+    // R1544925800 (H8/532 extra code)
+    {ToDigest("014e2e21ea30de7a1e4f1cdea14dd9a719960535e257a9e40e98dbb1a5870226"), Romset::MK1, RomLocation::ROM2},
+    // R15209276 (WAVE A)
+    {ToDigest("5655509a531804f97ea2d7ef05b8fec20ebf46216b389a84c44169257a4d2007"), Romset::MK1, RomLocation::WAVEROM1},
+    // R15209277 (WAVE B)
+    {ToDigest("c655b159792d999b90df9e4fa782cf56411ba1eaa0bb3ac2bdaf09e1391006b1"), Romset::MK1, RomLocation::WAVEROM2},
+    // R15209281 (WAVE C)
+    {ToDigest("334b2d16be3c2362210fdbec1c866ad58badeb0f84fd9bf5d0ac599baf077cc2"), Romset::MK1, RomLocation::WAVEROM3},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // SC-55 (v1.10)
+    ///////////////////////////////////////////////////////////////////////////
+
+    // TODO: missing hashes for this romset
+
+    // R15199736 (H8/532 mcu)
+    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::MK1, RomLocation::ROM1},
+    // R15209275 (H8/532 extra code)
+    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::MK1, RomLocation::ROM2},
+    // R15209276 (WAVE A)
+    {ToDigest("5655509a531804f97ea2d7ef05b8fec20ebf46216b389a84c44169257a4d2007"), Romset::MK1, RomLocation::WAVEROM1},
+    // R15209277 (WAVE B)
+    {ToDigest("c655b159792d999b90df9e4fa782cf56411ba1eaa0bb3ac2bdaf09e1391006b1"), Romset::MK1, RomLocation::WAVEROM2},
+    // R15209281 (WAVE C)
+    {ToDigest("334b2d16be3c2362210fdbec1c866ad58badeb0f84fd9bf5d0ac599baf077cc2"), Romset::MK1, RomLocation::WAVEROM3},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // SC-55 (v1.20)
+    ///////////////////////////////////////////////////////////////////////////
+
+    // R15199778 (H8/532 mcu)
+    {ToDigest("7e1bacd1d7c62ed66e465ba05597dcd60dfc13fc23de0287fdbce6cf906c6544"), Romset::MK1, RomLocation::ROM1},
+    // R1544925800 (H8/532 extra code)?
+    {ToDigest("22ce6ca59e6332143b335525e81fab501ea6fccce4b7e2f3bfc2cc8bf6612ff6"), Romset::MK1, RomLocation::ROM2},
+    // R15209276 (WAVE A)
+    {ToDigest("5655509a531804f97ea2d7ef05b8fec20ebf46216b389a84c44169257a4d2007"), Romset::MK1, RomLocation::WAVEROM1},
+    // R15209277 (WAVE B)
+    {ToDigest("c655b159792d999b90df9e4fa782cf56411ba1eaa0bb3ac2bdaf09e1391006b1"), Romset::MK1, RomLocation::WAVEROM2},
+    // R15209281 (WAVE C)
+    {ToDigest("334b2d16be3c2362210fdbec1c866ad58badeb0f84fd9bf5d0ac599baf077cc2"), Romset::MK1, RomLocation::WAVEROM3},
+
+    ///////////////////////////////////////////////////////////////////////////
     // SC-55 (v1.21)
     ///////////////////////////////////////////////////////////////////////////
 

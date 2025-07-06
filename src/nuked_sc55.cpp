@@ -116,6 +116,7 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
     auto romset   = "mk1";
 
     switch (model) {
+    case Model::Sc55_v1_00: rom_path /= "SC-55-v1.00"; break;
     case Model::Sc55_v1_20: rom_path /= "SC-55-v1.20"; break;
     case Model::Sc55_v1_21: rom_path /= "SC-55-v1.21"; break;
     case Model::Sc55_v2_00: rom_path /= "SC-55-v2.00"; break;

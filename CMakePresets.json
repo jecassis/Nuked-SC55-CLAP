@@ -2,21 +2,22 @@
   "version": 2,
   "configurePresets": [
     {
-      "name": "ninja",
+      "name": "default",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
       }
     },
     {
       "name": "debug",
-      "inherits": "ninja",
+      "inherits": "default",
       "binaryDir": "${sourceDir}/build/${presetName}"
     },
     {
       "name": "release",
-      "inherits": "ninja",
+      "inherits": "default",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
@@ -30,7 +31,7 @@
     },
     {
       "name": "msvc-sanitizer",
-      "inherits": "ninja",
+      "inherits": "default",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "ninja",
@@ -41,7 +42,7 @@
     },
     {
       "name": "gcc-sanitizer",
-      "inherits": "ninja",
+      "inherits": "default",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "ninja",
@@ -52,7 +53,7 @@
     },
     {
       "name": "clang-sanitizer",
-      "inherits": "ninja",
+      "inherits": "default",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "ninja",
@@ -66,7 +67,7 @@
   "buildPresets": [
     {
       "name": "ninja",
-      "configurePreset": "ninja"
+      "configurePreset": "default"
     },
     {
       "name": "debug",

@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "clap/clap.h"
-#include "nuked-sc55/emu.h"
+#include "nuked-sc55/backend/emu.h"
 #include "speex/speex_resampler.h"
 
 class NukedSc55 {

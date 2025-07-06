@@ -31,14 +31,14 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  */
+
 #pragma once
 
-#include <cstdint>
-#include <atomic>
-#include <thread>
-#include <mutex>
-#include "mcu_interrupt.h"
 #include "audio.h"
+#include "mcu_interrupt.h"
+#include "rom.h"
+#include <atomic>
+#include <cstdint>
 
 struct submcu_t;
 struct pcm_t;
@@ -190,20 +190,6 @@ static const int ROMSM_SIZE = 0x1000;
 
 static const uint32_t uart_buffer_size = 8192;
 
-enum class Romset {
-    MK2,
-    ST,
-    MK1,
-    CM300,
-    JV880,
-    SCB55,
-    RLP3237,
-    SC155,
-    SC155MK2,
-};
-
-constexpr size_t ROMSET_COUNT = 9;
-
 typedef void(*mcu_sample_callback)(void* userdata, const AudioFrame<int32_t>& frame);
 
 void MCU_DefaultSampleCallback(void* userdata, const AudioFrame<int32_t>& frame);
@@ -285,11 +271,9 @@ struct mcu_t {
 
     void* callback_userdata = nullptr;
     mcu_sample_callback sample_callback = MCU_DefaultSampleCallback;
-
-    std::mutex work_thread_lock;
 };
 
-bool MCU_Init(mcu_t& mcu, submcu_t& sm, pcm_t& pcm, mcu_timer_t& timer, lcd_t& lcd);
+void MCU_Init(mcu_t& mcu, submcu_t& sm, pcm_t& pcm, mcu_timer_t& timer, lcd_t& lcd);
 void MCU_Reset(mcu_t& mcu);
 void MCU_PatchROM(mcu_t& mcu);
 void MCU_Step(mcu_t& mcu);
@@ -544,6 +528,4 @@ void MCU_EncoderTrigger(mcu_t& mcu, int dir);
 void MCU_PostSample(mcu_t& mcu, const AudioFrame<int32_t>& frame);
 void MCU_PostUART(mcu_t& mcu, uint8_t data);
 
-void MCU_WorkThread_Lock(mcu_t& mcu);
-void MCU_WorkThread_Unlock(mcu_t& mcu);
-
+void MCU_SetRomset(mcu_t& mcu, Romset romset);

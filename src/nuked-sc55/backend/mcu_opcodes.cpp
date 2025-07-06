@@ -31,9 +31,9 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  */
-#include <stdio.h>
-#include "mcu.h"
+
 #include "mcu_opcodes.h"
+#include "mcu.h"
 #include "mcu_interrupt.h"
 
 int32_t MCU_SUB_Common(mcu_t& mcu, int32_t t1, int32_t t2, int32_t c_bit, uint32_t siz)
@@ -1805,4 +1805,3 @@ void (*MCU_Opcode_Table[32])(mcu_t& mcu, uint8_t opcode, uint8_t opcode_reg) = {
     MCU_Opcode_BTSTI, // 1E
     MCU_Opcode_BTSTI, // 1F
 };
-

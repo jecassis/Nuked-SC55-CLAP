@@ -31,69 +31,65 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  */
+
 #pragma once
-#include <stdint.h>
+
+#include <atomic>
+#include <cstdint>
+#include <mutex>
 
 struct mcu_t;
+struct lcd_t;
 
-struct PCM_Config
+static const int lcd_width_max = 1024;
+static const int lcd_height_max = 1024;
+
+class LCD_Backend
 {
-    // config_reg_3c
-    int noise_mask = 0;
-    int orval      = 0;
-    int write_mask = 0;
-    int dac_mask   = 0; // unused
+public:
+    virtual ~LCD_Backend() = default;
 
-    bool oversampling = false;
+    // Called on LCD_Start. The backend should fully initialize itself here.
+    virtual bool Start(const lcd_t& lcd) = 0;
 
-    // config_reg_3d
-    // important that this starts at 1, see derivation in PCM_Write
-    int reg_slots = 1;
+    // Called on LCD_Stop. The backend can choose to clean up resources here or keep them around in case the LCD is
+    // started again.
+    virtual void Stop() = 0;
+
+    // Called on LCD_Render. The backend should display a frame to the user.
+    virtual void Render() = 0;
 };
 
-struct pcm_t {
-    uint32_t ram1[32][8]{};
-    uint16_t ram2[32][16]{};
-    uint32_t select_channel = 0;
-    uint32_t voice_mask = 0;
-    uint32_t voice_mask_pending = 0;
-    uint32_t voice_mask_updating = 0;
-    uint32_t write_latch = 0;
-    uint32_t wave_read_address = 0;
-    uint8_t wave_byte_latch = 0;
-    uint32_t read_latch = 0;
-    uint8_t config_reg_3c = 0; // SC55:c3 JV880:c0
-    uint8_t config_reg_3d = 0;
-    uint32_t irq_channel = 0;
-    uint32_t irq_assert = 0;
-    PCM_Config config{};
-
-    uint32_t nfs = 0;
-
-    uint32_t tv_counter = 0;
-
-    uint64_t cycles = 0;
-
-    uint16_t eram[0x4000]{};
-
-    int accum_l = 0;
-    int accum_r = 0;
-    int rcsum[2]{};
-
+struct lcd_t {
     mcu_t* mcu = nullptr;
 
-    uint8_t waverom1[0x200000]{};
-    uint8_t waverom2[0x200000]{};
-    uint8_t waverom3[0x100000]{};
-    uint8_t waverom_card[0x200000]{};
-    uint8_t waverom_exp[0x800000]{};
+    size_t width = 0;
+    size_t height = 0;
 
-    bool disable_oversampling = false;
+    uint32_t color1 = 0;
+    uint32_t color2 = 0;
+
+    // all the variables in this group are updated by the MCU via LCD_Write
+    uint32_t LCD_DL = 0, LCD_N = 0, LCD_F = 0, LCD_D = 0, LCD_C = 0, LCD_B = 0, LCD_ID = 0, LCD_S = 0;
+    uint32_t LCD_DD_RAM = 0, LCD_AC = 0, LCD_CG_RAM = 0;
+    uint32_t LCD_RAM_MODE = 0;
+    uint8_t LCD_Data[80]{};
+    uint8_t LCD_CG[64]{};
+
+    // updated by MCU via LCD_Enable
+    std::atomic<uint8_t> enable = 0;
+
+    uint32_t buffer[lcd_height_max][lcd_width_max]{};
+
+    std::mutex mutex;
+
+    LCD_Backend* backend = nullptr;
 };
 
-void PCM_Write(pcm_t& pcm, uint32_t address, uint8_t data);
-uint8_t PCM_Read(pcm_t& pcm, uint32_t address);
-void PCM_Init(pcm_t& pcm, mcu_t& mcu);
-void PCM_Update(pcm_t& pcm, uint64_t cycles);
-uint32_t PCM_GetOutputFrequency(const pcm_t& pcm);
-void PCM_GetConfig(PCM_Config& config, uint8_t config_byte);
+
+void LCD_Init(lcd_t& lcd, mcu_t& mcu);
+bool LCD_Start(lcd_t& lcd);
+void LCD_Stop(lcd_t& lcd);
+void LCD_Write(lcd_t& lcd, uint32_t address, uint8_t data);
+void LCD_Enable(lcd_t& lcd, uint32_t enable);
+void LCD_Render(lcd_t& lcd);

@@ -5,6 +5,7 @@
 #include <string>
 
 #include "nuked_sc55.h"
+#include "nuked-sc55/common/rom_loader.h"
 
 // #define DEBUG
 
@@ -19,7 +20,7 @@ static FILE* logfile = nullptr;
 static void log_init()
 {
     logfile = fopen("/Users/jnovak/nuked-sc55-clap.log", "wb");
-    //    logfile = fopen("D:\nuked-sc55-clap.log", "wb");
+    //logfile = fopen("D:\\nuked-sc55-clap.log", "wb");
 }
 
 static void _log(const char* fmt, ...)
@@ -104,7 +105,7 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
 
     emu = std::make_unique<Emulator>();
 
-    const EMU_Options opts = {.enable_lcd = false};
+    const EMU_Options opts = {.lcd_backend = nullptr};
     if (!emu->Init(opts)) {
         log("emu->Init failed");
         emu.reset(nullptr);
@@ -112,14 +113,14 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
     }
 
     auto rom_path = GetRomBasePath();
-    auto romset   = Romset::MK1;
+    auto romset   = "mk1";
 
     switch (model) {
     case Model::Sc55_v1_20: rom_path /= "SC-55-v1.20"; break;
     case Model::Sc55_v1_21: rom_path /= "SC-55-v1.21"; break;
     case Model::Sc55_v2_00: rom_path /= "SC-55-v2.00"; break;
     case Model::Sc55mk2_v1_01:
-        romset = Romset::MK2;
+        romset = "mk2";
         rom_path /= "SC-55mk2-v1.01";
         break;
     default: assert(false);
@@ -127,7 +128,17 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
 
     log("ROM dir: %s", rom_path.c_str());
 
-    if (!emu->LoadRoms(romset, rom_path)) {
+    AllRomsetInfo romset_info{};
+    common::LoadRomsetResult load_result{};
+    common::RomOverrides rom_overrides;
+    common::LoadRomsetError err = common::LoadRomset(romset_info, rom_path, romset, false, rom_overrides, load_result);
+    if (err != common::LoadRomsetError{}) {
+        log("emu->LoadRomset failed");
+        emu.reset(nullptr);
+        return false;
+    }
+    RomLocationSet loaded{};
+    if (!emu->LoadRoms(load_result.romset, romset_info, &loaded)) {
         log("emu->LoadRoms failed");
         emu.reset(nullptr);
         return false;
@@ -376,7 +387,7 @@ constexpr uint8_t PitchBend       = 0xe0;
             event->data[0],
             event->data[1],
             event->data[2],
-            channel,
+            0, //channel,
             status_to_string(status));
         break;
 
@@ -384,7 +395,7 @@ constexpr uint8_t PitchBend       = 0xe0;
         log("MIDI event: %02x %02x    | Ch %d, %s",
             event->data[0],
             event->data[1],
-            channel,
+            0, // channel,
             status_to_string(status));
     }
 }

@@ -7,38 +7,37 @@
 #
 
 rm -rf out
-mkdir out
+mkdir -p out
+rm -rf build
 
 # Build arm64 release version
-rm -rf build
-cmake --preset=release -DCMAKE_OSX_ARCHITECTURES=arm64
-cmake --build build --preset=release
-mv build/release/Nuked-SC55.clap out
+cmake --preset macos-arm64-release
+cmake --build build --preset macos-arm64-release
+mv -f build/macos-arm64-release/Nuked-SC55.clap/ out/.
 
 # Build x86_64 release version
-rm -rf build
-cmake --preset=release -DCMAKE_OSX_ARCHITECTURES=x86_64
-cmake --build build --preset=release
-cp build/release/Nuked-SC55.clap/Contents/MacOS/Nuked-SC55 out/Nuked-SC55-x86_64
+cmake --preset macos-x64-release
+cmake --build build --preset macos-x64-release
+cp -f build/macos-x64-release/Nuked-SC55.clap/Contents/MacOS/Nuked-SC55 out/Nuked-SC55-x86_64
 
 # Create universal binary
 lipo out/Nuked-SC55-x86_64 \
-	 out/Nuked-SC55.clap/Contents/MacOS/Nuked-SC55 \
-	 -create -output out/Nuked-SC55
+  out/Nuked-SC55.clap/Contents/MacOS/Nuked-SC55 \
+  -create -output out/Nuked-SC55
 
-rm out/Nuked-SC55-x86_64
-rm out/Nuked-SC55.clap/Contents/MacOS/Nuked-SC55
+rm -f out/Nuked-SC55-x86_64
+rm -f out/Nuked-SC55.clap/Contents/MacOS/Nuked-SC55
 
-mv out/Nuked-SC55 out/Nuked-SC55.clap/Contents/MacOS/
+mv -f out/Nuked-SC55 out/Nuked-SC55.clap/Contents/MacOS/
 
 # Verify
 echo
 echo "----------------------------------------------------------------------"
 
-ARCHS=`lipo -archs out/Nuked-SC55.clap/Contents/MacOS/Nuked-SC55`
+ARCHS=$(lipo -archs out/Nuked-SC55.clap/Contents/MacOS/Nuked-SC55)
 
-if [ "$ARCHS" == "x86_64 arm64" ]; then
-	echo "Success! Universal binary app bundle is in 'out/Nuked-SC55.clap'"
+if [[ "$ARCHS" == "x86_64 arm64" ]]; then
+  echo "Success! Universal binary app bundle is in 'out/Nuked-SC55.clap'"
 else
-	echo "Oops, something went wrong. Arch of the CLAP plugin is '$ARCHS'"
+  echo "Oops, something went wrong. Arch of the CLAP plugin is '$ARCHS'"
 fi

@@ -1,0 +1,66 @@
+name: Build
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    name: ${{ matrix.label }}-${{ matrix.arch }}-${{ matrix.build_type }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: windows
+            arch: x64
+            triplet: x64-windows
+            build_type: release
+          - os: windows-latest
+            label: windows
+            arch: arm64
+            triplet: arm64-windows
+            build_type: release
+          - os: ubuntu-latest
+            label: linux
+            arch: x64
+            triplet: x64-linux
+            build_type: release
+          - os: macos-14
+            label: macos
+            arch: arm64
+            triplet: arm64-osx
+            build_type: release
+    env:
+      VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Install CMake
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: ~3.31.0
+          ninjaVersion: latest
+      - name: Set up vcpkg
+        uses: lukka/run-vcpkg@v11
+        id: runvcpkg
+        with:
+          vcpkgDirectory: ${{ runner.workspace }}/vcpkg
+          vcpkgJsonGlob: '**/vcpkg.json'
+      - name: List $RUNNER_WORKSPACE before build
+        run: find $RUNNER_WORKSPACE
+        shell: bash
+      - name: Print output of "run-vcpkg"
+        run: echo "root='${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_ROOT_OUT }}', triplet='${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_DEFAULT_TRIPLET_OUT }}'"
+      - name: Configure and build plug-in
+        uses: lukka/run-cmake@v10
+        with:
+          cmakeListsTxtPath: ${{ github.workspace }}/CMakeLists.txt
+          configurePreset: ${{ matrix.label }}-${{ matrix.arch }}-${{ matrix.build_type }}
+          buildPreset: ${{ matrix.label }}-${{ matrix.arch }}-${{ matrix.build_type }}
+      - name: List $RUNNER_WORKSPACE after build
+        run: find $RUNNER_WORKSPACE
+        shell: bash
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Nuked-SC55-CLAP-${{ matrix.label }}-${{ matrix.arch }}-${{ matrix.build_type }}
+          path: build/${{ matrix.label }}-${{ matrix.arch }}-${{ matrix.build_type }}/Nuked-SC55.clap

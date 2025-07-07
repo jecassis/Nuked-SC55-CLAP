@@ -105,7 +105,7 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
 
     emu = std::make_unique<Emulator>();
 
-    const EMU_Options opts = {.lcd_backend = nullptr};
+    const EMU_Options opts = {.lcd_backend = nullptr, .nvram_filename = std::filesystem::path{}};
     if (!emu->Init(opts)) {
         log("emu->Init failed");
         emu.reset(nullptr);
@@ -396,7 +396,7 @@ constexpr uint8_t PitchBend       = 0xe0;
         log("MIDI event: %02x %02x    | Ch %d, %s",
             event->data[0],
             event->data[1],
-            0, // channel,
+            0, //channel,
             status_to_string(status));
     }
 }

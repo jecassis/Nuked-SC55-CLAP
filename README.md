@@ -1,6 +1,6 @@
-# Nuked SC-55 CLAP
+# Nuked SC-55 CLAP audio plug-in
 
-Nuked SC-55 for the CLever Audio Plug-in ([CLAP](https://cleveraudio.org/)) is built upon [J.C. Moyer's fork](https://github.com/jcmoyer/Nuked-SC55) of nukeykt's original [Nuked SC-55](https://github.com/nukeykt/Nuked-SC55) project.
+The Nuked SC-55 CLAP audio plug-in ([CLAP](https://cleveraudio.org/)) is built upon [J.C. Moyer's fork](https://github.com/jcmoyer/Nuked-SC55) of nukeykt's original [Nuked SC-55](https://github.com/nukeykt/Nuked-SC55) project.
 
 The plug-in aims to preserve an important part of DOS gaming history for all to freely enjoy for posterity. It is only intended for **personal use** (e.g., retro gaming or writing music as a hobby) and **research purposes**. See the [License](#license) section for additional details.
 
@@ -31,7 +31,7 @@ If macOS Gatekeeper prevents the plug-in from running, you will need to explicit
 sudo xattr -rd com.apple.quarantine <path-to>/Nuked-SC55.clap
 ```
 
-### ROM Files
+### ROM files
 
 The emulation needs dumps of the original hardware's ROM chips to function. If any of the ROM files for a given model are not present or they are invalid, you will not be able to load the plugin for that particular model. It is the easiest to grab the ROM files from [here](https://archive.org/details/nuked-sc-55-clap-rom-files), but here are the instructions how to set them up if you are getting them from elsewhere.
 
@@ -122,48 +122,48 @@ Alternatively, you can use [Meson](#meson-alternative-build-method), but that bu
 
 ### Installing vcpkg
 
-If vcpkg is not installed:
+If you don't have vcpkg installed yet:
 
 ```bash
 git clone https://github.com/microsoft/vcpkg.git
 cd vcpkg && bootstrap-vcpkg.sh
 ```
 
-Then append this to `.bashrc` or `.zshrc`:
+Then append this to your `.bashrc` or `.zshrc`:
 
 ```bash
 export VCPKG_ROOT=<vcpkg_repo_location>
 export PATH=$VCPKG_ROOT:$PATH
 ```
 
-On Windows, run `bootstrap-vcpkg.bat` instead of `bootstrap-vcpkg.sh` and set the `PATH` Windows enviroment variable accordingly:
+On Windows, run `bootstrap-vcpkg.bat` instead and set the `PATH` Windows enviroment variable accordingly:
 
 ```pwsh
 $env:VCPKG_ROOT="<vcpkg_repo_location>"
 $env:PATH="$env:VCPKG_ROOT;$env:PATH"
 ```
 
-### Building the Project
+### Building the project
 
 #### Windows
 
-First configure the project:
+First you'll need to configure the project:
 
 ```pwsh
-cmake --preset windows-x64-debug
+cmake --preset debug-windows-x64
 ```
 
-Then build the **debug artifact** (this will create the `Nuked-SC55.clap` plugin in `build\windows-x64-debug`):
+Then build the **debug artifact** (this will create the `Nuked-SC55.clap` plugin in `build\debug-windows-x64`):
 
 ```pwsh
-cmake --build --preset windows-x64-debug
+cmake --build --preset debug-windows-x64
 ```
 
-To configure and build the **release artifact** (this will create the `Nuked-SC55.clap` plugin in `build\windows-x64-release`):
+To configure and build the **release artifact** (this will create the `Nuked-SC55.clap` plugin in `build\release-windows-x64`):
 
 ```pwsh
-cmake --preset windows-x64-release
-cmake --build --preset windows-x64-release
+cmake --preset release-windows-x64
+cmake --build --preset release-windows-x64
 ```
 
 The `msvc-sanitizer` preset is also available for debugging.
@@ -172,18 +172,18 @@ The `msvc-sanitizer` preset is also available for debugging.
 
 Run [`build-macos.sh`](build-macos.sh) to create the universal binary app bundle in the `out` directory. Alternatively, follow the manual steps below.
 
-First configure the project. Use the corresponding command to configure the debug or release build:
+First you'll need to configure the project. Use the corresponding command to configure the debug or release build:
 
 ```zsh
-cmake --preset macos-arm64-debug
-cmake --preset macos-arm64-release
+cmake --preset debug-macos-arm64
+cmake --preset release-macos-arm64
 ```
 
 To cross-compile, (e.g., for x86_64):
 
 ```zsh
-cmake --preset macos-x64-debug
-cmake --preset macos-x64-release
+cmake --preset debug-macos-x64
+cmake --preset release-macos-x64
 ```
 
 To build the project (use the same preset):
@@ -198,11 +198,11 @@ The `clang-sanitizer` preset is also available for debugging.
 
 #### Linux
 
-First configure the project. Use the corresponding command to configure the debug or release build:
+First you'll need to configure the project. Use the corresponding command to configure the debug or release build:
 
 ```zsh
-cmake --preset linux-x64-debug
-cmake --preset linux-x64-release
+cmake --preset debug-linux-x64
+cmake --preset release-linux-x64
 ```
 
 To build the project (use the same preset):
@@ -218,17 +218,17 @@ The following presets are also available for debugging:
 - `gcc-sanitizer`
 - `clang-sanitizer`
 
-### Cleaning the Build Directory
+### Cleaning the build directory
 
 To clean the `build/<preset>` directory (e.g., for MSVC):
 
 ```bash
-cmake --build --preset windows-x64-release --target clean
+cmake --build --preset release-windows-x64 --target clean
 ```
 
 To start from scratch, delete the `build` directory and run the configure commands again.
 
-### Meson (Alternative Build Method)
+### Meson (alternative build method)
 
 Release build using statically-linked SpeexDSP (for portable releases):
 

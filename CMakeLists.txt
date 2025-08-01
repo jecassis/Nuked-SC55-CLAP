@@ -27,7 +27,6 @@ add_library(Nuked-SC55-CLAP MODULE
     src/nuked-sc55/backend/mcu_interrupt.cpp
     src/nuked-sc55/backend/mcu_opcodes.cpp
     src/nuked-sc55/backend/mcu_timer.cpp
-    src/nuked-sc55/backend/path_util.cpp
     src/nuked-sc55/backend/pcm.cpp
     src/nuked-sc55/backend/rom.cpp
     src/nuked-sc55/backend/rom_io.cpp

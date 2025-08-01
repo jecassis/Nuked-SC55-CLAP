@@ -133,6 +133,18 @@ inline int32_t SaturatingAdd(int32_t a, int32_t b)
     return (int32_t)Clamp<int64_t>(result, INT32_MIN, INT32_MAX);
 }
 
+inline int16_t SaturatingMul(int16_t a, float b)
+{
+    int32_t result = (int32_t)((float)a * b);
+    return (int16_t)Clamp<int32_t>(result, INT16_MIN, INT16_MAX);
+}
+
+inline int32_t SaturatingMul(int32_t a, float b)
+{
+    int64_t result = (int64_t)((float)a * b);
+    return (int32_t)Clamp<int64_t>(result, INT32_MIN, INT32_MAX);
+}
+
 // Auto vectorizes in clang at -O2, gcc at -O3
 inline void HorizontalSatAddI16(int16_t* dest, int16_t* src_first, int16_t* src_last)
 {

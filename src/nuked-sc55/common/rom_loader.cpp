@@ -29,7 +29,7 @@ const char* ToCString(LoadRomsetError error)
     }
 }
 
-LoadRomsetError LoadRomset(AllRomsetInfo&           romset_info,
+LoadRomsetError LoadRomset(AllRomsetInfo&               romset_info,
                            const std::filesystem::path& rom_directory,
                            std::string_view             desired_romset,
                            bool                         legacy_loader,
@@ -122,10 +122,10 @@ void PrintRomsets(FILE* output)
     //fprintf(output, "\n\n");
 }
 
-void PrintLoadRomsetDiagnostics(FILE*                    output,
-                                LoadRomsetError          error,
-                                const LoadRomsetResult&  result,
-                                const AllRomsetInfo& info)
+void PrintLoadRomsetDiagnostics(FILE*                   output,
+                                LoadRomsetError         error,
+                                const LoadRomsetResult& result,
+                                const AllRomsetInfo&    info)
 {
     //switch (error)
     //{
@@ -137,7 +137,34 @@ void PrintLoadRomsetDiagnostics(FILE*                    output,
     //    PrintRomsets(output);
     //    break;
     //case LoadRomsetError::NoCompleteRomsets:
-    //    fprintf(output, "error: %s\n", ToCString(error));
+    //    fprintf(output, "No complete romsets found.\n");
+    //    for (size_t rs = 0; rs < ROMSET_COUNT; ++rs)
+    //    {
+    //        RomCompletionStatusSet completion;
+    //
+    //        (void)IsCompleteRomset(info, (Romset)rs, &completion);
+    //
+    //        if (CountPresent(completion))
+    //        {
+    //            fprintf(output, "Romset %s partially complete:\n", RomsetName((Romset)rs));
+    //            for (size_t i = 0; i < ROMLOCATION_COUNT; ++i)
+    //            {
+    //                if (completion[i] != RomCompletionStatus::Unused)
+    //                {
+    //                    fprintf(output, "  * %7s: %-12s", ToCString(completion[i]), ToCString((RomLocation)i));
+    //
+    //                    if (completion[i] == RomCompletionStatus::Present)
+    //                    {
+    //                        fprintf(output, "%s\n", info.romsets[rs].rom_paths[i].generic_string().c_str());
+    //                    }
+    //                    else
+    //                    {
+    //                        fprintf(output, "\n");
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
     //    break;
     //case LoadRomsetError::IncompleteRomset:
     //    fprintf(output, "Romset %s is incomplete:\n", RomsetName(result.romset));
@@ -145,11 +172,8 @@ void PrintLoadRomsetDiagnostics(FILE*                    output,
     //    {
     //        if (result.completion[i] != RomCompletionStatus::Unused)
     //        {
-    //            fprintf(output,
-    //                    "  * %7s: %-12s",
-    //                    ToCString(result.completion[i]),
-    //                    ToCString((RomLocation)i));
-
+    //            fprintf(output, " * %7s: %-12s", ToCString(result.completion[i]), ToCString((RomLocation)i));
+    //
     //            if (result.completion[i] == RomCompletionStatus::Present)
     //            {
     //                fprintf(output, "%s\n", info.romsets[(size_t)result.romset].rom_paths[i].generic_string().c_str());
@@ -176,7 +200,7 @@ void PrintLoadRomsetDiagnostics(FILE*                    output,
     //    }
     //    break;
     //}
-
+    //
     //if (error == LoadRomsetError{})
     //{
     //    fprintf(output, "Using %s romset:\n", RomsetName(result.romset));

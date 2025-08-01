@@ -13,19 +13,19 @@ jobs:
 
       matrix:
         include:
-          - os: windows-2019
+          - os: windows-2022
             label: windows
             arch: x64
             triplet: x64-windows
             build_type: release
 
-          - os: windows-2019
+          - os: windows-2022
             label: windows
             arch: arm64
             triplet: arm64-windows
             build_type: release
 
-          - os: ubuntu-22.0
+          - os: ubuntu-22.04
             label: linux
             arch: x64
             triplet: x64-linux

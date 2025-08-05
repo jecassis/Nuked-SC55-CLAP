@@ -330,7 +330,7 @@ static constexpr KnownHash ROM_HASHES[] = {
     // SC-55 (v1.10)
     ///////////////////////////////////////////////////////////////////////////
 
-    // TODO: missing hashes for this romset
+    // TODO: missing hashes for this ROM set
 
     // R15199736 (H8/532 mcu)
     {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::MK1, RomLocation::ROM1},
@@ -349,7 +349,7 @@ static constexpr KnownHash ROM_HASHES[] = {
 
     // R15199778 (H8/532 mcu)
     {ToDigest("7e1bacd1d7c62ed66e465ba05597dcd60dfc13fc23de0287fdbce6cf906c6544"), Romset::MK1, RomLocation::ROM1},
-    // R1544925800 (H8/532 extra code)?
+    // R15209337? (H8/532 extra code)
     {ToDigest("22ce6ca59e6332143b335525e81fab501ea6fccce4b7e2f3bfc2cc8bf6612ff6"), Romset::MK1, RomLocation::ROM2},
     // R15209276 (WAVE A)
     {ToDigest("5655509a531804f97ea2d7ef05b8fec20ebf46216b389a84c44169257a4d2007"), Romset::MK1, RomLocation::WAVEROM1},
@@ -434,12 +434,33 @@ static constexpr KnownHash ROM_HASHES[] = {
     {ToDigest("5b753f6cef4cfc7fcafe1430fecbb94a739b874e55356246a46abe24097ee491"), Romset::CM300, RomLocation::WAVEROM3},
 
     ///////////////////////////////////////////////////////////////////////////
-    // JV-880 (v1.0.0)
+    // JV-880 (v1.00)
     ///////////////////////////////////////////////////////////////////////////
+
+    // TODO: missing JV-880 optional ROMs
 
     // R15199810 (H8/532 mcu)
     {ToDigest("aabfcf883b29060198566440205f2fae1ce689043ea0fc7074842aaa4fd4823e"), Romset::JV880, RomLocation::ROM1},
     // R15209386 (H8/532 extra code)
+    {ToDigest("11852e60ff597633c754c5441c1e3e06793bcd951fcea2c4969ac3041d130fce"), Romset::JV880, RomLocation::ROM2},
+    // R15209312 (WAVE A)
+    {ToDigest("aa3101a76d57992246efeda282a2cb0c0f8fdb441c2eed2aa0b0fad4d81f3ad4"), Romset::JV880, RomLocation::WAVEROM1},
+    // R15209313 (WAVE B)
+    {ToDigest("a7b50bb47734ee9117fa16df1f257990a9a1a0b5ed420337ae4310eb80df75c8"), Romset::JV880, RomLocation::WAVEROM2},
+    // R00000000 (placeholder)
+    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::JV880, RomLocation::WAVEROM_CARD},
+    // R00000000 (placeholder)
+    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::JV880, RomLocation::WAVEROM_EXP},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // JV-880 (v1.01)
+    ///////////////////////////////////////////////////////////////////////////
+
+    // TODO: missing JV-880 optional ROMs
+
+    // R15199810 (H8/532 mcu)
+    {ToDigest("aabfcf883b29060198566440205f2fae1ce689043ea0fc7074842aaa4fd4823e"), Romset::JV880, RomLocation::ROM1},
+    // R15209386? (H8/532 extra code)
     {ToDigest("ed437f1bc75cc558f174707bcfeb45d5e03483efd9bfd0a382ca57c0edb2a40c"), Romset::JV880, RomLocation::ROM2},
     // R15209312 (WAVE A)
     {ToDigest("aa3101a76d57992246efeda282a2cb0c0f8fdb441c2eed2aa0b0fad4d81f3ad4"), Romset::JV880, RomLocation::WAVEROM1},
@@ -450,18 +471,16 @@ static constexpr KnownHash ROM_HASHES[] = {
     // R00000000 (placeholder)
     {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::JV880, RomLocation::WAVEROM_EXP},
 
-    // TODO: missing jv880 optional roms
-
     ///////////////////////////////////////////////////////////////////////////
     // SCB-55/RLP-3194
     ///////////////////////////////////////////////////////////////////////////
 
-    // TODO: missing hashes for this romset
+    // TODO: missing hashes for this ROM set
 
     // R15199827 (H8/532 mcu)
     {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::SCB55, RomLocation::ROM1},
     // R15279828 (H8/532 extra code)
-    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::SCB55, RomLocation::ROM2},
+    {ToDigest("541be4d0b1ef0d07bb042ba67ffd099c8a5d746aac4cd24ce8842c034379f213"), Romset::SCB55, RomLocation::ROM2},
     // R15209359 (WAVE 16M)
     {ToDigest("c6429e21b9b3a02fbd68ef0b2053668433bee0bccd537a71841bc70b8874243b"), Romset::SCB55, RomLocation::WAVEROM1},
     // R15279813 (WAVE 8M)
@@ -472,7 +491,7 @@ static constexpr KnownHash ROM_HASHES[] = {
     // RLP-3237
     ///////////////////////////////////////////////////////////////////////////
 
-    // TODO: missing hashes for this romset
+    // TODO: missing hashes for this ROM set
 
     // R15199827 (H8/532 mcu)
     {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::RLP3237, RomLocation::ROM1},
@@ -500,7 +519,7 @@ static constexpr KnownHash ROM_HASHES[] = {
     // SC-155 (rev 2)
     ///////////////////////////////////////////////////////////////////////////
 
-    // TODO: missing hashes for this romset
+    // TODO: missing hashes for this ROM set
 
     // R15199799 (H8/532 mcu)
     {ToDigest("24a65c97cdbaa847d6f59193523ce63c73394b4b693a6517ee79441f2fb8a3ee"), Romset::SC155, RomLocation::ROM1},
@@ -514,10 +533,10 @@ static constexpr KnownHash ROM_HASHES[] = {
     {ToDigest("334b2d16be3c2362210fdbec1c866ad58badeb0f84fd9bf5d0ac599baf077cc2"), Romset::SC155, RomLocation::WAVEROM3},
 
     ///////////////////////////////////////////////////////////////////////////
-    // Extra/modified roms
+    // Extra/modified ROMs
     ///////////////////////////////////////////////////////////////////////////
 
-    // CTF patched roms from https://github.com/shingo45endo/sc55mk2-ctf-patcher
+    // CTF patched ROMs from https://github.com/shingo45endo/sc55mk2-ctf-patcher
 
     // Tone: Strict SC-55 | Drum: SC-55 v1.21 or earlier
     {ToDigest("64f8c9daf1021cf86ea4ddf03a29b81b5ea0c18e74f462833023436388bb9dc4"), Romset::MK2, RomLocation::ROM2},

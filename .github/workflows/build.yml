@@ -47,12 +47,12 @@ jobs:
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
       - name: Install CMake
-        uses: lukka/get-cmake@latest
+        uses: lukka/get-cmake@v4
         with:
           cmakeVersion: ~3.31.0
           ninjaVersion: latest

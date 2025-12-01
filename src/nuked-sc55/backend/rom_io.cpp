@@ -234,11 +234,11 @@ constexpr uint8_t HexValue(char x)
 {
     if (x >= '0' && x <= '9')
     {
-        return x - '0';
+        return (uint8_t)(x - '0');
     }
     else if (x >= 'a' && x <= 'f')
     {
-        return 10 + (x - 'a');
+        return 10 + (uint8_t)(x - 'a');
     }
     else
     {
@@ -255,7 +255,7 @@ constexpr SHA256Digest ToDigest(const char (&s)[N])
     SHA256Digest hash;
     for (size_t i = 0; i < N / 2; ++i)
     {
-        hash[i] = (HexValue(s[2 * i + 0]) << 4) | HexValue(s[2 * i + 1]);
+        hash[i] = (uint8_t)((HexValue(s[2 * i + 0]) << 4) | HexValue(s[2 * i + 1]));
     }
 
     return hash;
@@ -270,6 +270,23 @@ struct KnownHash
 
 // clang-format off
 static constexpr KnownHash ROM_HASHES[] = {
+    ///////////////////////////////////////////////////////////////////////////
+    // SC-55mk2 (v1.00)
+    ///////////////////////////////////////////////////////////////////////////
+    
+    // TODO: missing hashes for this ROM set
+
+    // R15199848 (H8/532 mcu)
+    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::MK2, RomLocation::ROM1},
+    // R15199859 (H8/532 extra code)
+    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::MK2, RomLocation::ROM2},
+    // R15209463 (M37450M2 mcu)
+    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::MK2, RomLocation::SMROM},
+    // R15209359 (WAVE 16M)
+    {ToDigest("c6429e21b9b3a02fbd68ef0b2053668433bee0bccd537a71841bc70b8874243b"), Romset::MK2, RomLocation::WAVEROM1},
+    // R15279813 (WAVE 8M)
+    {ToDigest("5b753f6cef4cfc7fcafe1430fecbb94a739b874e55356246a46abe24097ee491"), Romset::MK2, RomLocation::WAVEROM2},
+
     ///////////////////////////////////////////////////////////////////////////
     // SC-55mk2/SC-155mk2 (v1.01)
     ///////////////////////////////////////////////////////////////////////////
@@ -303,7 +320,7 @@ static constexpr KnownHash ROM_HASHES[] = {
     // R15199858 (H8/532 mcu)
     {ToDigest("8a1eb33c7599b746c0c50283e4349a1bb1773b5c0ec0e9661219bf6c067d2042"), Romset::ST, RomLocation::ROM1},
     // R00561413 (H8/532 extra code)
-    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::ST, RomLocation::ROM2},
+    {ToDigest("03517ac0a3b1ad8b69a1a4ee045e0c21da0170027bd1ba1bd3cf72cd017bbe6a"), Romset::ST, RomLocation::ROM2},
     // R15199880 (M37450M2 mcu)
     {ToDigest("b0b5f865a403f7308b4be8d0ed3ba2ed1c22db881b8a8326769dea222f6431d8"), Romset::ST, RomLocation::SMROM},
     // R15209359 (WAVE 16M)
@@ -317,7 +334,7 @@ static constexpr KnownHash ROM_HASHES[] = {
 
     // R15199748 (H8/532 mcu)
     {ToDigest("b4ecf44bc0520322b0d114d397951d3bf92ca6fa51d0d27b2407df58a6be2efe"), Romset::MK1, RomLocation::ROM1},
-    // R1544925800 (H8/532 extra code)
+    // R15449258 (H8/532 extra code)
     {ToDigest("014e2e21ea30de7a1e4f1cdea14dd9a719960535e257a9e40e98dbb1a5870226"), Romset::MK1, RomLocation::ROM2},
     // R15209276 (WAVE A)
     {ToDigest("5655509a531804f97ea2d7ef05b8fec20ebf46216b389a84c44169257a4d2007"), Romset::MK1, RomLocation::WAVEROM1},
@@ -330,12 +347,10 @@ static constexpr KnownHash ROM_HASHES[] = {
     // SC-55 (v1.10)
     ///////////////////////////////////////////////////////////////////////////
 
-    // TODO: missing hashes for this romset
-
     // R15199736 (H8/532 mcu)
-    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::MK1, RomLocation::ROM1},
+    {ToDigest("2fe88ec39f3ef4b1de8cdf74527419467975c47f7aacfcd07605e01d54bd89b5"), Romset::MK1, RomLocation::ROM1},
     // R15209275 (H8/532 extra code)
-    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::MK1, RomLocation::ROM2},
+    {ToDigest("ec064d6c4fc70ec990911089d966043cb819fba0e26e6f6afdd0a05e5301b91b"), Romset::MK1, RomLocation::ROM2},
     // R15209276 (WAVE A)
     {ToDigest("5655509a531804f97ea2d7ef05b8fec20ebf46216b389a84c44169257a4d2007"), Romset::MK1, RomLocation::WAVEROM1},
     // R15209277 (WAVE B)
@@ -349,7 +364,7 @@ static constexpr KnownHash ROM_HASHES[] = {
 
     // R15199778 (H8/532 mcu)
     {ToDigest("7e1bacd1d7c62ed66e465ba05597dcd60dfc13fc23de0287fdbce6cf906c6544"), Romset::MK1, RomLocation::ROM1},
-    // R1544925800 (H8/532 extra code)?
+    // R15209337 (H8/532 extra code)
     {ToDigest("22ce6ca59e6332143b335525e81fab501ea6fccce4b7e2f3bfc2cc8bf6612ff6"), Romset::MK1, RomLocation::ROM2},
     // R15209276 (WAVE A)
     {ToDigest("5655509a531804f97ea2d7ef05b8fec20ebf46216b389a84c44169257a4d2007"), Romset::MK1, RomLocation::WAVEROM1},
@@ -393,7 +408,7 @@ static constexpr KnownHash ROM_HASHES[] = {
     ///////////////////////////////////////////////////////////////////////////
 
     // R15199774 (H8/532 mcu)
-    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::CM300, RomLocation::ROM1},
+    {ToDigest("72ed35481efbf25b3c492b83183655d17a3b266ecb30ffbc6dc977e6a8d261b2"), Romset::CM300, RomLocation::ROM1},
     // R15279809 (H8/532 extra code)
     {ToDigest("0283d32e6993a0265710c4206463deb937b0c3a4819b69f471a0eca5865719f9"), Romset::CM300, RomLocation::ROM2},
     // R15279806 (WAVE A)
@@ -408,7 +423,7 @@ static constexpr KnownHash ROM_HASHES[] = {
     ///////////////////////////////////////////////////////////////////////////
 
     // R15199774 (H8/532 mcu)
-    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::CM300, RomLocation::ROM1},
+    {ToDigest("72ed35481efbf25b3c492b83183655d17a3b266ecb30ffbc6dc977e6a8d261b2"), Romset::CM300, RomLocation::ROM1},
     // R15279812 (H8/532 extra code)
     {ToDigest("fef1acb1969525d66238be5e7811108919b07a4df5fbab656ad084966373483f"), Romset::CM300, RomLocation::ROM2},
     // R15279806 (WAVE A)
@@ -434,34 +449,51 @@ static constexpr KnownHash ROM_HASHES[] = {
     {ToDigest("5b753f6cef4cfc7fcafe1430fecbb94a739b874e55356246a46abe24097ee491"), Romset::CM300, RomLocation::WAVEROM3},
 
     ///////////////////////////////////////////////////////////////////////////
-    // JV-880 (v1.0.0)
+    // JV-880 (v1.0.0 or v1.00)
     ///////////////////////////////////////////////////////////////////////////
+
+    // TODO: missing JV-880 optional ROMs
 
     // R15199810 (H8/532 mcu)
     {ToDigest("aabfcf883b29060198566440205f2fae1ce689043ea0fc7074842aaa4fd4823e"), Romset::JV880, RomLocation::ROM1},
     // R15209386 (H8/532 extra code)
+    {ToDigest("11852e60ff597633c754c5441c1e3e06793bcd951fcea2c4969ac3041d130fce"), Romset::JV880, RomLocation::ROM2},
+    // R15209312 (WAVE A)
+    {ToDigest("aa3101a76d57992246efeda282a2cb0c0f8fdb441c2eed2aa0b0fad4d81f3ad4"), Romset::JV880, RomLocation::WAVEROM1},
+    // R15209313 (WAVE B)
+    {ToDigest("a7b50bb47734ee9117fa16df1f257990a9a1a0b5ed420337ae4310eb80df75c8"), Romset::JV880, RomLocation::WAVEROM2},
+    // R00000000 (PCM card)
+    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::JV880, RomLocation::WAVEROM_CARD},
+    // R00000000 (Expansion PCB)
+    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::JV880, RomLocation::WAVEROM_EXP},
+
+    ///////////////////////////////////////////////////////////////////////////
+    // JV-880 (v1.0.1 or v1.01)
+    ///////////////////////////////////////////////////////////////////////////
+
+    // TODO: missing JV-880 optional ROMs
+
+    // R15199810 (H8/532 mcu)
+    {ToDigest("aabfcf883b29060198566440205f2fae1ce689043ea0fc7074842aaa4fd4823e"), Romset::JV880, RomLocation::ROM1},
+    // R15209481 (H8/532 extra code)
     {ToDigest("ed437f1bc75cc558f174707bcfeb45d5e03483efd9bfd0a382ca57c0edb2a40c"), Romset::JV880, RomLocation::ROM2},
     // R15209312 (WAVE A)
     {ToDigest("aa3101a76d57992246efeda282a2cb0c0f8fdb441c2eed2aa0b0fad4d81f3ad4"), Romset::JV880, RomLocation::WAVEROM1},
     // R15209313 (WAVE B)
     {ToDigest("a7b50bb47734ee9117fa16df1f257990a9a1a0b5ed420337ae4310eb80df75c8"), Romset::JV880, RomLocation::WAVEROM2},
-    // R00000000 (placeholder)
+    // R00000000 (PCM card)
     {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::JV880, RomLocation::WAVEROM_CARD},
-    // R00000000 (placeholder)
+    // R00000000 (Expansion PCB)
     {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::JV880, RomLocation::WAVEROM_EXP},
-
-    // TODO: missing jv880 optional roms
 
     ///////////////////////////////////////////////////////////////////////////
     // SCB-55/RLP-3194
     ///////////////////////////////////////////////////////////////////////////
 
-    // TODO: missing hashes for this romset
-
     // R15199827 (H8/532 mcu)
-    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::SCB55, RomLocation::ROM1},
+    {ToDigest("00df835d3f97fc8b0059db63f36d608eec2bfd1f51ad54eb5af52c868c1111b1"), Romset::SCB55, RomLocation::ROM1},
     // R15279828 (H8/532 extra code)
-    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::SCB55, RomLocation::ROM2},
+    {ToDigest("541be4d0b1ef0d07bb042ba67ffd099c8a5d746aac4cd24ce8842c034379f213"), Romset::SCB55, RomLocation::ROM2},
     // R15209359 (WAVE 16M)
     {ToDigest("c6429e21b9b3a02fbd68ef0b2053668433bee0bccd537a71841bc70b8874243b"), Romset::SCB55, RomLocation::WAVEROM1},
     // R15279813 (WAVE 8M)
@@ -472,14 +504,12 @@ static constexpr KnownHash ROM_HASHES[] = {
     // RLP-3237
     ///////////////////////////////////////////////////////////////////////////
 
-    // TODO: missing hashes for this romset
-
     // R15199827 (H8/532 mcu)
-    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::RLP3237, RomLocation::ROM1},
+    {ToDigest("00df835d3f97fc8b0059db63f36d608eec2bfd1f51ad54eb5af52c868c1111b1"), Romset::RLP3237, RomLocation::ROM1},
     // R15209486 (H8/532 extra code)
-    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::RLP3237, RomLocation::ROM2},
+    {ToDigest("e0a3d6d9b05e82374a0d289901273ce560ce1ead86459c75f844158b32d204a9"), Romset::RLP3237, RomLocation::ROM2},
     // R15279824 (WAVE 16M)
-    {ToDigest("0000000000000000000000000000000000000000000000000000000000000000"), Romset::RLP3237, RomLocation::WAVEROM1},
+    {ToDigest("dae2a8bc0fd3bcaf3f5e3ab6c4c6fd30e2663bf26ca17afe52924874c0afc4e2"), Romset::RLP3237, RomLocation::WAVEROM1},
 
     ///////////////////////////////////////////////////////////////////////////
     // SC-155 (rev 1)
@@ -500,7 +530,7 @@ static constexpr KnownHash ROM_HASHES[] = {
     // SC-155 (rev 2)
     ///////////////////////////////////////////////////////////////////////////
 
-    // TODO: missing hashes for this romset
+    // TODO: missing hashes for this ROM set
 
     // R15199799 (H8/532 mcu)
     {ToDigest("24a65c97cdbaa847d6f59193523ce63c73394b4b693a6517ee79441f2fb8a3ee"), Romset::SC155, RomLocation::ROM1},
@@ -514,10 +544,10 @@ static constexpr KnownHash ROM_HASHES[] = {
     {ToDigest("334b2d16be3c2362210fdbec1c866ad58badeb0f84fd9bf5d0ac599baf077cc2"), Romset::SC155, RomLocation::WAVEROM3},
 
     ///////////////////////////////////////////////////////////////////////////
-    // Extra/modified roms
+    // Extra/modified ROMs
     ///////////////////////////////////////////////////////////////////////////
 
-    // CTF patched roms from https://github.com/shingo45endo/sc55mk2-ctf-patcher
+    // CTF patched ROMs from https://github.com/shingo45endo/sc55mk2-ctf-patcher
 
     // Tone: Strict SC-55 | Drum: SC-55 v1.21 or earlier
     {ToDigest("64f8c9daf1021cf86ea4ddf03a29b81b5ea0c18e74f462833023436388bb9dc4"), Romset::MK2, RomLocation::ROM2},
@@ -545,7 +575,7 @@ bool DetectRomsetsByHash(const std::filesystem::path& base_path,
 
     if (ec)
     {
-//        fprintf(stderr, "Failed to walk rom directory: %s\n", ec.message().c_str());
+        //fprintf(stderr, "Failed to walk rom directory: %s\n", ec.message().c_str());
         return false;
     }
 
@@ -556,10 +586,10 @@ bool DetectRomsetsByHash(const std::filesystem::path& base_path,
         const bool is_file = dir_iter->is_regular_file(ec);
         if (ec)
         {
-//            fprintf(stderr,
-//                    "Failed to check file type of `%s`: %s\n",
-//                    dir_iter->path().generic_string().c_str(),
-//                    ec.message().c_str());
+            //fprintf(stderr,
+            //        "Failed to check file type of `%s`: %s\n",
+            //        dir_iter->path().generic_string().c_str(),
+            //        ec.message().c_str());
             return false;
         }
 
@@ -568,7 +598,7 @@ bool DetectRomsetsByHash(const std::filesystem::path& base_path,
             dir_iter.increment(ec);
             if (ec)
             {
-//                fprintf(stderr, "Failed to get next file: %s\n", ec.message().c_str());
+                //fprintf(stderr, "Failed to get next file: %s\n", ec.message().c_str());
                 return false;
             }
             continue;
@@ -577,10 +607,10 @@ bool DetectRomsetsByHash(const std::filesystem::path& base_path,
         const uintmax_t file_size = dir_iter->file_size(ec);
         if (ec)
         {
-//            printf(stderr,
-//                    "Failed to get file size of `%s`: %s\n",
-//                    dir_iter->path().generic_string().c_str(),
-//                    ec.message().c_str());
+            //fprintf(stderr,
+            //        "Failed to get file size of `%s`: %s\n",
+            //        dir_iter->path().generic_string().c_str(),
+            //        ec.message().c_str());
             return false;
         }
 
@@ -590,7 +620,7 @@ bool DetectRomsetsByHash(const std::filesystem::path& base_path,
             dir_iter.increment(ec);
             if (ec)
             {
-//                fprintf(stderr, "Failed to get next file: %s\n", ec.message().c_str());
+                //fprintf(stderr, "Failed to get next file: %s\n", ec.message().c_str());
                 return false;
             }
             continue;
@@ -602,7 +632,7 @@ bool DetectRomsetsByHash(const std::filesystem::path& base_path,
         SHA256Digest  digest_bytes;
 
         SHA256Reset(&ctx);
-        SHA256Input(&ctx, buffer.data(), buffer.size());
+        SHA256Input(&ctx, buffer.data(), (unsigned int)buffer.size());
         SHA256Result(&ctx, digest_bytes.data());
 
         for (const auto& known : ROM_HASHES)
@@ -631,7 +661,7 @@ bool DetectRomsetsByHash(const std::filesystem::path& base_path,
         dir_iter.increment(ec);
         if (ec)
         {
-//            fprintf(stderr, "Failed to get next file: %s\n", ec.message().c_str());
+            //fprintf(stderr, "Failed to get next file: %s\n", ec.message().c_str());
             return false;
         }
     }

@@ -35,7 +35,7 @@
         "VCPKG_TARGET_TRIPLET": "x64-windows-static-md",
         "VCPKG_HOST_TRIPLET": "x64-windows"
       }
-      },
+    },
     {
       "name": "release-windows-x64",
       "inherits": [ "base-vcpkg" ],
@@ -50,7 +50,7 @@
         "VCPKG_TARGET_TRIPLET": "x64-windows-static-md",
         "VCPKG_HOST_TRIPLET": "x64-windows"
       }
-      },
+    },
     {
       "name": "debug-windows-arm64",
       "inherits": [ "base-vcpkg" ],

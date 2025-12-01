@@ -60,8 +60,6 @@ static void log_shutdown() {}
     #define log(...)
 #endif
 
-
-
 //----------------------------------------------------------------------------
 
 // Get the environment variable value from the provided name, 
@@ -177,11 +175,13 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
     }
 
     auto rom_paths = GetRomBasePaths();
-    for (auto rom_path : rom_paths) {
-        auto romset   = "mk1";
+    for (const auto& base_path : rom_paths) {
+        auto rom_path = base_path;
+        auto romset = "mk1";
 
         switch (model) {
         case Model::Sc55_v1_00: rom_path /= "SC-55-v1.00"; break;
+        case Model::Sc55_v1_10: rom_path /= "SC-55-v1.10"; break;
         case Model::Sc55_v1_20: rom_path /= "SC-55-v1.20"; break;
         case Model::Sc55_v1_21: rom_path /= "SC-55-v1.21"; break;
         case Model::Sc55_v2_00: rom_path /= "SC-55-v2.00"; break;
@@ -209,7 +209,7 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
             return false;
         }
         return true;
-        }
+    }
     log("Init failed, tried all ROM directories");
     emu.reset(nullptr);
     return false;
@@ -247,7 +247,7 @@ bool NukedSc55::Activate(const double requested_sample_rate,
         max_frame_count);
 
     emu->Reset();
-    emu->GetPCM().disable_oversampling = true;
+    emu->GetPCM().enable_oversampling = false;
     emu->PostSystemReset(EMU_SystemReset::GS_RESET);
 
     // Speed up the devices' bootup delay

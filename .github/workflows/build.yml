@@ -52,7 +52,7 @@ jobs:
           submodules: true
 
       - name: Install CMake
-        uses: lukka/get-cmake@v4
+        uses: lukka/get-cmake@latest
         with:
           cmakeVersion: ~3.31.0
           ninjaVersion: latest

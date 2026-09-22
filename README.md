@@ -151,7 +151,85 @@ SC-55mk2-v1.01/rom2.bin
 SC-55mk2-v1.01/rom_sm.bin
 SC-55mk2-v1.01/waverom1.bin
 SC-55mk2-v1.01/waverom2.bin
+
+SC-55st-v1.01/rom1.bin
+SC-55st-v1.01/rom2_st.bin
+SC-55st-v1.01/rom_sm.bin
+SC-55st-v1.01/waverom1.bin
+SC-55st-v1.01/waverom2.bin
+
+SC-155-rev1/sc155_rom1.bin
+SC-155-rev1/sc155_rom2.bin
+SC-155-rev1/sc155_waverom1.bin
+SC-155-rev1/sc155_waverom2.bin
+SC-155-rev1/sc155_waverom3.bin
+
+CM-300-SCC-1-v1.10/cm300_rom1.bin
+CM-300-SCC-1-v1.10/cm300_rom2.bin
+CM-300-SCC-1-v1.10/cm300_waverom1.bin
+CM-300-SCC-1-v1.10/cm300_waverom2.bin
+CM-300-SCC-1-v1.10/cm300_waverom3.bin
+
+CM-300-SCC-1-v1.20/cm300_rom1.bin
+CM-300-SCC-1-v1.20/cm300_rom2.bin
+CM-300-SCC-1-v1.20/cm300_waverom1.bin
+CM-300-SCC-1-v1.20/cm300_waverom2.bin
+CM-300-SCC-1-v1.20/cm300_waverom3.bin
+
+SCC-1A-v1.30/cm300_rom1.bin
+SCC-1A-v1.30/cm300_rom2.bin
+SCC-1A-v1.30/cm300_waverom1.bin
+SCC-1A-v1.30/cm300_waverom2.bin
+SCC-1A-v1.30/cm300_waverom3.bin
+
+SCB-55-v2.00/scb55_rom1.bin
+SCB-55-v2.00/scb55_rom2.bin
+SCB-55-v2.00/scb55_waverom1.bin
+SCB-55-v2.00/scb55_waverom2.bin
+
+RLP-3237-v2.01/rlp3237_rom1.bin
+RLP-3237-v2.01/rlp3237_rom2.bin
+RLP-3237-v2.01/rlp3237_waverom1.bin
+
+JV-880-v1.00/jv880_rom1.bin
+JV-880-v1.00/jv880_rom2.bin
+JV-880-v1.00/jv880_waverom1.bin
+JV-880-v1.00/jv880_waverom2.bin
+
+JV-880-v1.01/jv880_rom1.bin
+JV-880-v1.01/jv880_rom2.bin
+JV-880-v1.01/jv880_waverom1.bin
+JV-880-v1.01/jv880_waverom2.bin
 ```
+
+### JV-880 NVRAM (required for sound)
+
+Unlike the Sound Canvas models, the JV-880 keeps its patches and settings in
+battery-backed NVRAM rather than in ROM. Without valid NVRAM it boots and
+receives MIDI but has no patch to play, so it stays **silent**.
+
+To get sound from the JV-880, place a 32 KB (32768-byte) factory-preset NVRAM
+dump named `jv880_nvram.bin` in the same directory as its ROMs:
+
+```
+JV-880-v1.00/jv880_nvram.bin
+JV-880-v1.01/jv880_nvram.bin
+```
+
+The file is optional: if it is missing (or not exactly 32 KB) the plugin loads
+as before, just without sound. When present, it is loaded at startup and written
+back on shutdown so any changes persist.
+
+This plugin has no front-panel UI, so it cannot create the dump itself. Generate
+it once using the [upstream standalone
+frontend](https://github.com/jcmoyer/Nuked-SC55): run it with your JV-880 ROMs
+and `--nvram jv880_nvram.bin`, then on the emulated device press `T` (Utility),
+tap `.` until `Util:Factory preset` appears, press `G` twice, and quit. Copy the
+resulting file next to the ROMs as shown above.
+
+>[!Note]
+>The standalone appends an instance number to the filename; rename it to
+>`jv880_nvram.bin`.
 
 ## Building
 
@@ -165,7 +243,7 @@ libraries](#using-system-libs-on-linux-alternative-build-method).
 
 #### All platforms
 
-- CMake (3.27.0 or later)
+- CMake (4.4.0 or later)
 - vcpkg (latest)
 
 #### Windows

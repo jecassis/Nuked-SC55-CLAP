@@ -1,7 +1,24 @@
+/*
+ * Copyright (C) 2024-2026 J.C. Moyer
+ *
+ * This file is part of Nuked-SC55.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ */
+
 #pragma once
 
-#include "../backend/file_hashing.h"
-#include "../backend/rom_io.h"
+#include "file_hashing.h"
+#include "rom_io.h"
 
 namespace common
 {
@@ -76,12 +93,10 @@ enum class RomLoader
 // Returns `LoadRomsetError{}` on success.
 LoadRomsetError LoadRomset(const std::filesystem::path& rom_directory, std::string_view desired_romset, RomLoader loader, const RomOverrides& overrides, LoadRomsetResult& result);
 
-// `output`: where to write romset list
-void PrintRomsets(FILE* output);
+void PrintRomsets();
 
-// `output`: where to write diagnostics to
 // `error`: error to write diagnostics for
 // `results`: results object to take diagnostics information from
-void PrintLoadRomsetDiagnostics(FILE* output, LoadRomsetError error, const LoadRomsetResult& result);
+void PrintLoadRomsetDiagnostics(LoadRomsetError error, const LoadRomsetResult& result);
 
 } // namespace common

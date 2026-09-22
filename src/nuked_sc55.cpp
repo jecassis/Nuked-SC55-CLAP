@@ -2,15 +2,17 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
+#include <fstream>
 #include <ranges>
 #include <string>
 #include <string_view>
 
 #ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
+    #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+    #endif
+    #include <windows.h>
 #endif
 
 #include "nuked_sc55.h"
@@ -24,7 +26,7 @@ static std::string get_env_var(const char* var_name);
 // Simple debug logging
 #ifdef DEBUG
 
-#include <cstdarg>
+    #include <cstdarg>
 
 static FILE* logfile = nullptr;
 
@@ -34,13 +36,13 @@ static void log_init()
         return;
     }
 
-#ifdef _WIN32
+    #ifdef _WIN32
     if (fopen_s(&logfile, "D:\\nuked-sc55-clap.log", "wb") != 0) {
         logfile = nullptr;
     }
-#else
+    #else
     logfile = fopen("/Users/jnovak/nuked-sc55-clap.log", "wb");
-#endif
+    #endif
 }
 
 static void _log(const char* fmt, ...)
@@ -67,7 +69,7 @@ static void log_shutdown()
     }
 }
 
-#define log(...) _log(__VA_ARGS__)
+    #define log(...) _log(__VA_ARGS__)
 #else
 
 static void log_init() {}
@@ -78,8 +80,8 @@ static void log_shutdown() {}
 
 //----------------------------------------------------------------------------
 
-// Get the environment variable value from the provided name, 
-// if the variable exists. Returns an empty string if the 
+// Get the environment variable value from the provided name,
+// if the variable exists. Returns an empty string if the
 // variable does not exist, or is empty
 static std::string get_env_var(const char* var_name)
 {
@@ -101,10 +103,56 @@ static std::string get_env_var(const char* var_name)
 }
 
 #ifdef _WIN32
-    constexpr auto PathSeparator = std::string_view(";");
+constexpr auto PathSeparator = std::string_view(";");
 #else
-    constexpr auto PathSeparator = std::string_view(":");
+constexpr auto PathSeparator = std::string_view(":");
 #endif
+
+constexpr float Mk1DcOffset              = 1.0f / 32.0f;
+constexpr clap_id ParamId_RemoveDcOffset = 0;
+constexpr clap_id ParamId_OutputGain     = 1;
+constexpr uint8_t StateVersion           = 1;
+constexpr uint8_t RemoveDcOffsetCc       = 20;
+constexpr uint8_t OutputGainCc           = 21;
+
+// mk2 devices have a sub-MCU (SMROM) that takes much longer to boot.
+static bool ModelHasSubMcu(const NukedSc55::Model model)
+{
+    switch (model) {
+    case NukedSc55::Model::Sc55mk2_v1_01:
+    case NukedSc55::Model::Sc55st_v1_01: return true;
+    default: return false;
+    }
+}
+
+// The JV-880 keeps its patches and settings in battery-backed NVRAM rather than
+// ROM, so it produces no sound until valid NVRAM is loaded.
+static bool ModelIsJv880(const NukedSc55::Model model)
+{
+    switch (model) {
+    case NukedSc55::Model::Jv880_v1_00:
+    case NukedSc55::Model::Jv880_v1_01: return true;
+    default: return false;
+    }
+}
+
+// The ~1/32 DC offset is a trait of the mk1 analog output stage; shared by the
+// SC-55 mk1, SC-155 and CM-300/SCC-1.
+static bool ModelHasDcOffset(const NukedSc55::Model model)
+{
+    switch (model) {
+    case NukedSc55::Model::Sc55_v1_00:
+    case NukedSc55::Model::Sc55_v1_10:
+    case NukedSc55::Model::Sc55_v1_20:
+    case NukedSc55::Model::Sc55_v1_21:
+    case NukedSc55::Model::Sc55_v2_00:
+    case NukedSc55::Model::Sc155_rev1:
+    case NukedSc55::Model::Cm300_v1_10:
+    case NukedSc55::Model::Cm300_v1_20:
+    case NukedSc55::Model::Scc1a_v1_30: return true;
+    default: return false;
+    }
+}
 
 extern std::string plugin_path;
 
@@ -129,14 +177,14 @@ const clap_plugin_t* NukedSc55::GetPluginClass()
     return &plugin_class;
 }
 
-// Get a list of potential ROM directories from an environment variable 
-// if it is set to a non-empty value. The paths must be absolute directory paths.
-// Entries must be separated by the OS PATH separator
+// Get a list of potential ROM directories from an environment variable
+// if it is set to a non-empty value. The paths must be absolute directory
+// paths. Entries must be separated by the OS path separator
 std::vector<std::filesystem::path> NukedSc55::GetRomEnvDirs()
 {
-    constexpr char env_rom_dir_name[] = "SOUNDCANVAS_ROM_PATH";
+    constexpr char env_rom_dir_name[]        = "SOUNDCANVAS_ROM_PATH";
     std::vector<std::filesystem::path> paths = {};
-    const auto env_dir_list = get_env_var(env_rom_dir_name);
+    const auto env_dir_list                  = get_env_var(env_rom_dir_name);
     if (env_dir_list.empty()) {
         return paths;
     }
@@ -183,7 +231,8 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
 
     emu = std::make_unique<Emulator>();
 
-    const EMU_Options opts = {.lcd_backend = nullptr, .nvram_filename = std::filesystem::path{}};
+    const EMU_Options opts = {.lcd_backend    = nullptr,
+                              .nvram_filename = std::filesystem::path{}};
     if (!emu->Init(opts)) {
         log("emu->Init failed");
         emu.reset(nullptr);
@@ -192,7 +241,7 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
 
     auto rom_paths = GetRomBasePaths();
     for (const auto& base_path : rom_paths) {
-        auto rom_path = base_path;
+        auto rom_path      = base_path;
         const char* romset = "";
 
         switch (model) {
@@ -202,6 +251,15 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
         case Model::Sc55_v1_21: romset = "mk1-v1.21"; rom_path /= "SC-55-v1.21"; break;
         case Model::Sc55_v2_00: romset = "mk1-v2.00"; rom_path /= "SC-55-v2.00"; break;
         case Model::Sc55mk2_v1_01: romset = "mk2-v1.01"; rom_path /= "SC-55mk2-v1.01"; break;
+        case Model::Sc55st_v1_01: romset = "st-v1.01"; rom_path /= "SC-55st-v1.01"; break;
+        case Model::Sc155_rev1: romset = "sc155-rev1"; rom_path /= "SC-155-rev1"; break;
+        case Model::Cm300_v1_10: romset = "cm300-v1.10"; rom_path /= "CM-300-SCC-1-v1.10"; break;
+        case Model::Cm300_v1_20: romset = "cm300-v1.20"; rom_path /= "CM-300-SCC-1-v1.20"; break;
+        case Model::Scc1a_v1_30: romset = "cm300-v1.30"; rom_path /= "SCC-1A-v1.30"; break;
+        case Model::Scb55_v2_00: romset = "scb55-v2.00"; rom_path /= "SCB-55-v2.00"; break;
+        case Model::Rlp3237_v2_01: romset = "rlp3237-v2.01"; rom_path /= "RLP-3237-v2.01"; break;
+        case Model::Jv880_v1_00: romset = "jv880-v1.0.0"; rom_path /= "JV-880-v1.00"; break;
+        case Model::Jv880_v1_01: romset = "jv880-v1.0.1"; rom_path /= "JV-880-v1.01"; break;
         default: assert(false);
         }
 
@@ -209,7 +267,8 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
 
         common::LoadRomsetResult load_result = {};
         common::RomOverrides rom_overrides;
-        common::LoadRomsetError err = common::LoadRomset(rom_path, romset, common::RomLoader::Hashing, rom_overrides, load_result);
+        common::LoadRomsetError err = common::LoadRomset(
+            rom_path, romset, common::RomLoader::Hashing, rom_overrides, load_result);
         if (err != common::LoadRomsetError{}) {
             log("`common::LoadRomset()` failed. Trying next directory");
             continue;
@@ -219,6 +278,9 @@ bool NukedSc55::Init(const clap_plugin* _plugin_instance)
             log("`emu->LoadRoms()` failed");
             emu.reset(nullptr);
             return false;
+        }
+        if (ModelIsJv880(model)) {
+            LoadJv880Nvram(rom_path);
         }
         return true;
     }
@@ -231,11 +293,52 @@ void NukedSc55::Shutdown()
 {
     log("Shutdown");
 
+    SaveJv880Nvram();
+
     if (resampler) {
         speex_resampler_destroy(resampler);
         resampler = nullptr;
     }
     log_shutdown();
+}
+
+// JV-880 NVRAM is stored next to the ROMs as "jv880_nvram.bin". It is only
+// loaded when present and exactly `NVRAM_SIZE` bytes; the device stays silent
+// if it is missing.
+void NukedSc55::LoadJv880Nvram(const std::filesystem::path& rom_dir)
+{
+    const auto candidate = rom_dir / "jv880_nvram.bin";
+
+    std::error_code ec;
+    const auto size = std::filesystem::file_size(candidate, ec);
+    if (ec || size != static_cast<std::uintmax_t>(NVRAM_SIZE)) {
+        log("JV-880 NVRAM not loaded (missing or wrong size): %s",
+            candidate.string().c_str());
+        return;
+    }
+
+    std::ifstream file(candidate, std::ios::binary);
+    if (!file.read(reinterpret_cast<char*>(emu->GetMCU().nvram), NVRAM_SIZE)) {
+        log("Failed to read JV-880 NVRAM: %s", candidate.string().c_str());
+        return;
+    }
+
+    nvram_path = candidate;
+    log("Loaded JV-880 NVRAM: %s", candidate.string().c_str());
+}
+
+// Persists NVRAM back to the file it was loaded from. Only runs when an NVRAM
+// file was loaded, it never creates a new file.
+void NukedSc55::SaveJv880Nvram()
+{
+    if (!emu || nvram_path.empty()) {
+        return;
+    }
+
+    std::ofstream file(nvram_path, std::ios::binary | std::ios::trunc);
+    if (!file.write(reinterpret_cast<const char*>(emu->GetMCU().nvram), NVRAM_SIZE)) {
+        log("Failed to save JV-880 NVRAM: %s", nvram_path.string().c_str());
+    }
 }
 
 static void receive_sample(void* userdata, const AudioFrame<int32_t>& in)
@@ -251,7 +354,7 @@ static void receive_sample(void* userdata, const AudioFrame<int32_t>& in)
 
 bool NukedSc55::Activate(const double requested_sample_rate,
                          [[maybe_unused]] const uint32_t min_frame_count,
-                         const uint32_t max_frame_count)
+                         [[maybe_unused]] const uint32_t max_frame_count)
 {
     log("Activate: requested_sample_rate: %g, min_frame_count: %d, max_frame_count: %d",
         requested_sample_rate,
@@ -260,10 +363,22 @@ bool NukedSc55::Activate(const double requested_sample_rate,
 
     emu->Reset();
     emu->GetPCM().enable_oversampling = false;
-    emu->PostSystemReset(EMU_SystemReset::GS_RESET);
 
-    // Speed up the devices' bootup delay
-    const size_t num_steps = (model == Model::Sc55mk2_v1_01) ? 9'500'000 : 700'000;
+    // The JV-880 is not a GS device and ignores the GS reset (the Sound Canvas
+    // models use it to work around a firmware pitch bug).
+    if (!ModelIsJv880(model)) {
+        emu->PostSystemReset(EMU_SystemReset::GS_RESET);
+    }
+
+    // Fast-forward each device's boot delay. mk2 devices have a sub-MCU that
+    // takes much longer to boot. The JV-880 doesn't enable its MIDI receiver
+    // (serial RX) until ~10M steps, so it needs a much larger budget.
+    size_t num_steps = 700'000;
+    if (ModelHasSubMcu(model)) {
+        num_steps = 9'500'000;
+    } else if (ModelIsJv880(model)) {
+        num_steps = 12'000'000;
+    }
 
     for (size_t i = 0; i < num_steps; i++) {
         MCU_Step(emu->GetMCU());
@@ -370,11 +485,11 @@ clap_process_status NukedSc55::Process(const clap_process_t* process)
         ResampleAndPublishFrames(num_frames, out_left, out_right);
 
     } else {
-	assert(out_left && out_right);
+        assert(out_left && out_right);
 
-	assert(render_buf.size() == 2);
-	assert(render_buf[0].size() >= num_frames);
-	assert(render_buf[1].size() >= num_frames);
+        assert(render_buf.size() == 2);
+        assert(render_buf[0].size() >= num_frames);
+        assert(render_buf[1].size() >= num_frames);
 
         for (size_t i = 0; i < num_frames; ++i) {
             out_left[i]  = render_buf[0][i];
@@ -394,18 +509,187 @@ bool NukedSc55::LoadState([[maybe_unused]] const clap_istream_t* stream)
         return false;
     }
 
-    // TODO return true once implemented
-    return false;
+    // State layout: [version:uint8_t][remove_dc_offset:uint8_t][output_gain:float32]
+    const auto read_exact = [&](void* dst, size_t len) -> bool {
+        auto* p        = static_cast<uint8_t*>(dst);
+        uint64_t total = 0;
+        while (total < len) {
+            const int64_t n = stream->read(stream, p + total, len - total);
+            if (n <= 0) {
+                return false;
+            }
+            total += static_cast<uint64_t>(n);
+        }
+        return true;
+    };
+
+    uint8_t buffer[2 + sizeof(float)] = {};
+    if (!read_exact(buffer, sizeof(buffer)) || buffer[0] != StateVersion) {
+        return false;
+    }
+
+    remove_dc_offset.store(buffer[1] != 0, std::memory_order_relaxed);
+
+    float gain = 1.0f;
+    std::memcpy(&gain, buffer + 2, sizeof(gain));
+    // Reject NaN/out-of-range values.
+    if (!(gain >= 0.0f && gain <= 1.0f)) {
+        gain = 1.0f;
+    }
+    output_gain.store(gain, std::memory_order_relaxed);
+    return true;
 }
 
 bool NukedSc55::SaveState([[maybe_unused]] const clap_ostream_t* stream)
 {
     if (!emu) {
-        return 0;
+        return false;
     }
 
-    // TODO return actual number of bytes written once implemented
-    return 0;
+    const float gain = output_gain.load(std::memory_order_relaxed);
+
+    uint8_t buffer[2 + sizeof(float)] = {
+        StateVersion,
+        static_cast<uint8_t>(remove_dc_offset.load(std::memory_order_relaxed) ? 1 : 0)};
+    std::memcpy(buffer + 2, &gain, sizeof(gain));
+
+    uint64_t total = 0;
+    while (total < sizeof(buffer)) {
+        const int64_t n = stream->write(stream, buffer + total, sizeof(buffer) - total);
+        if (n < 0) {
+            return false;
+        }
+        total += static_cast<uint64_t>(n);
+    }
+
+    return true;
+}
+
+uint32_t NukedSc55::ParamsCount() const
+{
+    // Output gain exists on every model; the DC offset only on the mk1 models.
+    return ModelHasDcOffset(model) ? 2 : 1;
+}
+
+bool NukedSc55::ParamsGetInfo(const uint32_t param_index, clap_param_info_t* info) const
+{
+    uint32_t index = param_index;
+
+    *info = {};
+
+    // The DC offset occupies index 0 on the models that have it.
+    if (ModelHasDcOffset(model)) {
+        if (index == 0) {
+            info->id    = ParamId_RemoveDcOffset;
+            info->flags = CLAP_PARAM_IS_STEPPED | CLAP_PARAM_IS_AUTOMATABLE |
+                          CLAP_PARAM_REQUIRES_PROCESS;
+            info->min_value     = 0.0;
+            info->max_value     = 1.0;
+            info->default_value = 1.0;
+            snprintf(info->name, sizeof(info->name), "%s", "Remove DC Offset");
+            info->module[0] = '\0';
+            return true;
+        }
+        --index;
+    }
+
+    if (index == 0) {
+        info->id    = ParamId_OutputGain;
+        info->flags = CLAP_PARAM_IS_AUTOMATABLE | CLAP_PARAM_REQUIRES_PROCESS;
+        info->min_value     = 0.0;
+        info->max_value     = 1.0;
+        info->default_value = 1.0;
+        snprintf(info->name, sizeof(info->name), "%s", "Output Gain");
+        info->module[0] = '\0';
+        return true;
+    }
+
+    return false;
+}
+
+bool NukedSc55::ParamsGetValue(const clap_id param_id, double* out_value) const
+{
+    if (param_id == ParamId_RemoveDcOffset && ModelHasDcOffset(model)) {
+        *out_value = remove_dc_offset.load(std::memory_order_relaxed) ? 1.0 : 0.0;
+        return true;
+    }
+
+    if (param_id == ParamId_OutputGain) {
+        *out_value = output_gain.load(std::memory_order_relaxed);
+        return true;
+    }
+
+    return false;
+}
+
+bool NukedSc55::ParamsValueToText(const clap_id param_id, const double value,
+                                  char* out_buffer,
+                                  const uint32_t out_buffer_capacity) const
+{
+    if (param_id == ParamId_OutputGain) {
+        if (value <= 0.0) {
+            snprintf(out_buffer, out_buffer_capacity, "%s", "-inf dB");
+        } else {
+            snprintf(out_buffer, out_buffer_capacity, "%.1f dB", 20.0 * std::log10(value));
+        }
+        return true;
+    }
+
+    if (param_id != ParamId_RemoveDcOffset) {
+        return false;
+    }
+
+    snprintf(out_buffer, out_buffer_capacity, "%s", value >= 0.5 ? "On" : "Off");
+    return true;
+}
+
+bool NukedSc55::ParamsTextToValue(const clap_id param_id,
+                                  const char* param_value_text, double* out_value) const
+{
+    if (param_id == ParamId_OutputGain) {
+        const std::string_view gain_text = param_value_text;
+        if (gain_text.find("inf") != std::string_view::npos) {
+            *out_value = 0.0;
+            return true;
+        }
+        double v = std::atof(param_value_text);
+        // A "dB" suffix is interpreted as decibels; a bare number is linear.
+        if (gain_text.find('d') != std::string_view::npos ||
+            gain_text.find('D') != std::string_view::npos) {
+            v = std::pow(10.0, v / 20.0);
+        }
+        if (v < 0.0) {
+            v = 0.0;
+        } else if (v > 1.0) {
+            v = 1.0;
+        }
+        *out_value = v;
+        return true;
+    }
+
+    if (param_id != ParamId_RemoveDcOffset) {
+        return false;
+    }
+
+    const std::string_view text = param_value_text;
+    if (text == "On" || text == "on" || text == "1" || text == "true") {
+        *out_value = 1.0;
+    } else if (text == "Off" || text == "off" || text == "0" || text == "false") {
+        *out_value = 0.0;
+    } else {
+        *out_value = (std::atof(param_value_text) >= 0.5) ? 1.0 : 0.0;
+    }
+    return true;
+}
+
+void NukedSc55::ParamsFlush(const clap_input_events_t* in,
+                            [[maybe_unused]] const clap_output_events_t* out)
+{
+    const uint32_t num_events = in->size(in);
+
+    for (uint32_t event_index = 0; event_index < num_events; ++event_index) {
+        ProcessEvent(in->get(in, event_index));
+    }
 }
 
 void NukedSc55::Flush(const clap_input_events_t* in,
@@ -427,8 +711,12 @@ void NukedSc55::Flush(const clap_input_events_t* in,
 
 void NukedSc55::PublishFrame(const float left, const float right)
 {
-    render_buf[0].emplace_back(left);
-    render_buf[1].emplace_back(right);
+    const bool apply_dc_removal = ModelHasDcOffset(model) &&
+                                  remove_dc_offset.load(std::memory_order_relaxed);
+    const float dc_offset = apply_dc_removal ? Mk1DcOffset : 0.0f;
+    const float gain      = output_gain.load(std::memory_order_relaxed);
+    render_buf[0].emplace_back((left - dc_offset) * gain);
+    render_buf[1].emplace_back((right - dc_offset) * gain);
 }
 
 constexpr uint8_t NoteOff         = 0x80;
@@ -489,11 +777,22 @@ void NukedSc55::ProcessEvent(const clap_event_header_t* event)
         case CLAP_EVENT_MIDI: {
             const auto midi_event = reinterpret_cast<const clap_event_midi_t*>(event);
 
-            emu->PostMIDI(midi_event->data[0]);
-            emu->PostMIDI(midi_event->data[1]);
-
             // 3-byte messages
             const auto status = midi_event->data[0] & 0xf0;
+
+            // MIDI CC fallback for MIDI-only hosts that cannot send CLAP
+            // parameter events. The CC is still forwarded to the emulator.
+            if (status == ControlChange && midi_event->data[1] == RemoveDcOffsetCc) {
+                remove_dc_offset.store(midi_event->data[2] >= 64,
+                                       std::memory_order_relaxed);
+            }
+            if (status == ControlChange && midi_event->data[1] == OutputGainCc) {
+                output_gain.store(static_cast<float>(midi_event->data[2]) / 127.0f,
+                                  std::memory_order_relaxed);
+            }
+
+            emu->PostMIDI(midi_event->data[0]);
+            emu->PostMIDI(midi_event->data[1]);
 
             switch (status) {
             case NoteOff:
@@ -505,6 +804,19 @@ void NukedSc55::ProcessEvent(const clap_event_header_t* event)
 #ifdef DEBUG
             log_midi_message(midi_event);
 #endif
+        } break;
+
+        case CLAP_EVENT_PARAM_VALUE: {
+            const auto param_event =
+                reinterpret_cast<const clap_event_param_value_t*>(event);
+
+            if (param_event->param_id == ParamId_RemoveDcOffset) {
+                remove_dc_offset.store(param_event->value >= 0.5,
+                                       std::memory_order_relaxed);
+            } else if (param_event->param_id == ParamId_OutputGain) {
+                output_gain.store(static_cast<float>(param_event->value),
+                                  std::memory_order_relaxed);
+            }
         } break;
 
         case CLAP_EVENT_MIDI_SYSEX: {

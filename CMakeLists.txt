@@ -15,7 +15,11 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_compile_options(-Wall -Wextra -Wno-unused-parameter)
 endif ()
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/nuked-sc55/backend
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/nuked-sc55/common
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/nuked-sc55/sha
+)
 
 # Plugin metadata shared by the CLAP descriptors, the Windows resource script
 # and the macOS bundle.
@@ -44,6 +48,19 @@ add_library(Nuked-SC55-CLAP MODULE
     src/nuked-sc55/backend/rom_io.cpp
     src/nuked-sc55/backend/standard_romsets.cpp
     src/nuked-sc55/backend/submcu.cpp
+
+    src/nuked-sc55/backend/decoder2/address_modes.cpp
+    src/nuked-sc55/backend/decoder2/cache.cpp
+    src/nuked-sc55/backend/decoder2/dispatch.cpp
+    src/nuked-sc55/backend/decoder2/dispatchers_aa.cpp
+    src/nuked-sc55/backend/decoder2/dispatchers_arn.cpp
+    src/nuked-sc55/backend/decoder2/dispatchers_d8d16_rn.cpp
+    src/nuked-sc55/backend/decoder2/dispatchers_imm16.cpp
+    src/nuked-sc55/backend/decoder2/dispatchers_postinc_rn.cpp
+    src/nuked-sc55/backend/decoder2/dispatchers_predec_rn.cpp
+    src/nuked-sc55/backend/decoder2/dispatchers_rn.cpp
+    src/nuked-sc55/backend/decoder2/dispatchers_top.cpp
+    src/nuked-sc55/backend/decoder2/instruction_handlers.cpp
 
     src/nuked-sc55/sha/sha224-256.c
     src/nuked-sc55/common/rom_loader.cpp
@@ -94,7 +111,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set_target_properties(Nuked-SC55-CLAP PROPERTIES
         SUFFIX ".clap"
         PDB_NAME Nuked-SC55-CLAP)
-
 
     # RC (resource compiler) is Windows-only.
     enable_language(RC)
